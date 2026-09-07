@@ -1,0 +1,49 @@
+name: Release
+
+# Builds the macOS (.dmg) and Windows (.exe) installers.
+# Push a version tag (for example v1.0.0) to build and publish a GitHub Release.
+# A manual run just builds and uploads the installers as workflow artifacts.
+on:
+  push:
+    tags:
+      - "v*.*.*"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build installer
+        # Publish to a GitHub Release only for tag builds; manual runs just build.
+        run: npx --no-install electron-builder --publish ${{ startsWith(github.ref, 'refs/tags/') && 'always' || 'never' }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # This app is not code-signed; skip signing so unsigned builds succeed.
+          CSC_IDENTITY_AUTO_DISCOVERY: false
+
+      - name: Upload installers as artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: claude-crab-${{ matrix.os }}
+          path: |
+            dist/*.dmg
+            dist/*.exe
+          if-no-files-found: ignore

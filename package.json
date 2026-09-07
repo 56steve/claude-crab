@@ -4,7 +4,9 @@
   "description": "A Claude crab desktop pet that evolves as you commit code.",
   "main": "main.js",
   "scripts": {
-    "start": "electron ."
+    "start": "electron .",
+    "dist": "electron-builder",
+    "pack": "electron-builder --dir"
   },
   "author": "56steve",
   "license": "MIT",
@@ -12,7 +14,41 @@
     "type": "git",
     "url": "https://github.com/56steve/claude-crab.git"
   },
+  "build": {
+    "appId": "com.56steve.claudecrab",
+    "productName": "Claude Crab",
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "tracker.js",
+      "github.js",
+      "tray-icon.js",
+      "config.json",
+      "renderer/**/*"
+    ],
+    "mac": {
+      "target": ["dmg"],
+      "category": "public.app-category.developer-tools",
+      "icon": "build/icon.png"
+    },
+    "win": {
+      "target": ["nsis"],
+      "icon": "build/icon.png"
+    },
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "56steve",
+        "repo": "claude-crab"
+      }
+    ]
+  },
   "devDependencies": {
-    "electron": "^33.2.1"
+    "electron": "^33.2.1",
+    "electron-builder": "^24.13.3"
   }
 }
