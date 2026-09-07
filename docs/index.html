@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Claude Crab, a desktop pet that grows as you commit</title>
+    <meta name="description" content="Claude Crab is a tiny desktop pet that hatches from an egg and evolves into a fiery inferno as you commit code. Free and open source, for macOS and Windows." />
+    <link rel="icon" href="icon.png" />
+    <meta property="og:title" content="Claude Crab" />
+    <meta property="og:description" content="A desktop pet that grows as you commit code. Free and open source." />
+    <meta property="og:image" content="evolution.png" />
+    <style>
+      :root {
+        --bg: #17120d;
+        --panel: #201811;
+        --panel-2: #241a12;
+        --line: rgba(255, 168, 74, 0.18);
+        --text: #fff5ea;
+        --muted: #b6a48f;
+        --accent: #ff7a12;
+        --accent-2: #ffc879;
+      }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html { scroll-behavior: smooth; }
+      body {
+        background: var(--bg);
+        color: var(--text);
+        font-family: -apple-system, "Segoe UI", system-ui, sans-serif;
+        line-height: 1.55;
+        -webkit-font-smoothing: antialiased;
+      }
+      img { max-width: 100%; display: block; }
+      a { color: inherit; }
+      .wrap { max-width: 1000px; margin: 0 auto; padding: 0 24px; }
+
+      /* nav */
+      nav {
+        display: flex; align-items: center; justify-content: space-between;
+        padding: 18px 24px; max-width: 1000px; margin: 0 auto;
+      }
+      .logo { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 17px; }
+      .logo img { width: 30px; height: 30px; border-radius: 7px; }
+      .nav-link {
+        display: inline-flex; align-items: center; gap: 7px;
+        text-decoration: none; color: var(--muted); font-weight: 600; font-size: 14px;
+        padding: 8px 14px; border: 1px solid var(--line); border-radius: 9px;
+        transition: color 0.15s, border-color 0.15s;
+      }
+      .nav-link:hover { color: var(--text); border-color: var(--accent); }
+      .nav-link svg { width: 16px; height: 16px; fill: currentColor; }
+
+      /* hero */
+      .hero { text-align: center; padding: 56px 0 30px; }
+      .hero h1 {
+        font-size: clamp(32px, 6vw, 54px); font-weight: 850; letter-spacing: -1.2px; line-height: 1.05;
+      }
+      .hero h1 .fire {
+        background: linear-gradient(120deg, var(--accent-2), var(--accent));
+        -webkit-background-clip: text; background-clip: text; color: transparent;
+      }
+      .hero p.lede {
+        color: var(--muted); font-size: clamp(15px, 2.2vw, 19px);
+        max-width: 620px; margin: 18px auto 0;
+      }
+      .badges { margin-top: 14px; font-size: 13px; color: var(--muted); }
+      .badges span { color: var(--accent-2); font-weight: 700; }
+
+      /* download buttons */
+      .downloads { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; margin-top: 30px; }
+      .btn {
+        display: inline-flex; align-items: center; gap: 10px;
+        text-decoration: none; font-weight: 700; font-size: 15px;
+        padding: 13px 22px; border-radius: 12px; transition: transform 0.08s, filter 0.15s;
+      }
+      .btn svg { width: 20px; height: 20px; fill: currentColor; }
+      .btn-primary {
+        color: #2a1204;
+        background: linear-gradient(180deg, var(--accent-2), var(--accent));
+        box-shadow: 0 10px 24px rgba(255, 122, 18, 0.28);
+      }
+      .btn-secondary { color: var(--text); background: var(--panel); border: 1.5px solid var(--line); }
+      .btn:hover { filter: brightness(1.06); }
+      .btn:active { transform: translateY(1px); }
+      .note { margin-top: 14px; font-size: 12.5px; color: var(--muted); }
+
+      .shot { margin: 44px auto 0; max-width: 900px; }
+      .shot img { border-radius: 16px; border: 1px solid var(--line); box-shadow: 0 24px 60px rgba(0,0,0,0.45); }
+
+      /* sections */
+      section { padding: 60px 0; }
+      .section-title { text-align: center; font-size: clamp(24px, 4vw, 34px); font-weight: 800; letter-spacing: -0.5px; }
+      .section-sub { text-align: center; color: var(--muted); margin: 10px auto 0; max-width: 560px; }
+
+      .cards { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-top: 36px; }
+      .card {
+        background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 26px;
+      }
+      .card .ico { width: 34px; height: 34px; margin-bottom: 14px; }
+      .card .ico svg { width: 34px; height: 34px; fill: var(--accent-2); }
+      .card h3 { font-size: 19px; font-weight: 800; margin-bottom: 8px; }
+      .card p { color: var(--muted); font-size: 14.5px; }
+      .card .emoji { font-size: 30px; line-height: 1; margin-bottom: 12px; }
+
+      /* stages */
+      .stages { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin-top: 36px; }
+      .stage {
+        background: var(--panel); border: 1px solid var(--line); border-radius: 14px;
+        padding: 18px 22px; text-align: center; min-width: 130px;
+      }
+      .stage .e { font-size: 30px; }
+      .stage .n { font-weight: 800; margin-top: 6px; }
+      .stage .c { color: var(--muted); font-size: 12.5px; margin-top: 2px; }
+      .arrow { align-self: center; color: var(--accent); font-size: 22px; font-weight: 800; }
+
+      /* privacy */
+      .privacy-box {
+        max-width: 720px; margin: 36px auto 0; text-align: center;
+        background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 30px;
+      }
+      .privacy-box .lock { font-size: 30px; }
+      .privacy-box p { color: var(--muted); margin-top: 10px; font-size: 15px; }
+      .privacy-box b { color: var(--accent-2); }
+
+      /* footer */
+      footer { border-top: 1px solid var(--line); padding: 30px 0 40px; text-align: center; color: var(--muted); font-size: 13.5px; }
+      footer a { color: var(--accent-2); text-decoration: none; font-weight: 600; }
+      footer a:hover { text-decoration: underline; }
+
+      @media (max-width: 680px) {
+        .cards { grid-template-columns: 1fr; }
+        .arrow { display: none; }
+      }
+    </style>
+  </head>
+  <body>
+    <nav>
+      <div class="logo"><img src="icon.png" alt="Claude Crab icon" /> Claude Crab</div>
+      <a class="nav-link" href="https://github.com/56steve/claude-crab" target="_blank" rel="noopener">
+        <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+        GitHub
+      </a>
+    </nav>
+
+    <header class="hero wrap">
+      <h1>Commit code. Grow a <span class="fire">crab</span>.</h1>
+      <p class="lede">
+        Claude Crab sits on your desktop and evolves as you commit, from an egg
+        to a fiery crab. It reads your commit count on your own machine or from
+        your GitHub account. That is the whole app.
+      </p>
+      <p class="badges"><span>Free and open source</span> &nbsp;·&nbsp; macOS and Windows &nbsp;·&nbsp; nothing leaves your device</p>
+
+      <div class="downloads">
+        <a class="btn btn-primary" href="https://github.com/56steve/claude-crab/releases/latest">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16.365 1.43c0 1.14-.42 2.19-1.12 3.02-.83.98-2.19 1.74-3.29 1.65-.14-1.11.44-2.29 1.09-3.03.74-.83 2.05-1.46 3.32-1.64zM20.9 17.03c-.62 1.42-.92 2.05-1.72 3.31-1.12 1.75-2.69 3.93-4.64 3.95-1.73.02-2.18-1.13-4.53-1.12-2.35.01-2.84 1.14-4.57 1.12-1.95-.02-3.44-1.99-4.56-3.74-3.13-4.9-3.46-10.65-1.53-13.71 1.37-2.18 3.54-3.46 5.58-3.46 2.07 0 3.38 1.14 5.1 1.14 1.66 0 2.67-1.14 5.06-1.14 1.81 0 3.73.99 5.1 2.69-4.48 2.46-3.75 8.86.31 10.96z"/></svg>
+          Download for macOS
+        </a>
+        <a class="btn btn-secondary" href="https://github.com/56steve/claude-crab/releases/latest">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M0 3.449L9.75 2.1v9.451H0m10.949-9.602L24 0v11.4H10.949M0 12.6h9.75v9.451L0 20.699M10.949 12.6H24V24l-13.051-1.351"/></svg>
+          Download for Windows
+        </a>
+      </div>
+      <p class="note">Installers are unsigned for now. On macOS, right-click the app and choose Open. On Windows, choose More info then Run anyway.</p>
+
+      <div class="shot">
+        <img src="evolution.png" alt="Claude Crab evolving from an egg to a hatchling to Blaze to Inferno as commit count grows" />
+      </div>
+    </header>
+
+    <section id="how">
+      <div class="wrap">
+        <h2 class="section-title">Two ways to count your commits</h2>
+        <p class="section-sub">Choose one the first time you open the app. Either way your data stays on your machine.</p>
+        <div class="cards">
+          <div class="card">
+            <div class="ico"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg></div>
+            <h3>GitHub</h3>
+            <p>Sign in with a short device code. No password, and no token to paste. It counts the commits you push to GitHub, private repos included, and keeps the sign-in token encrypted on your machine.</p>
+          </div>
+          <div class="card">
+            <div class="emoji">📁</div>
+            <h3>Local folders</h3>
+            <p>No sign in and no network. It scans the git repos on your machine and counts commits by your email, including work you have not pushed anywhere yet.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="stages" style="padding-top: 0;">
+      <div class="wrap">
+        <h2 class="section-title">Four stages</h2>
+        <p class="section-sub">Your crab moves up a stage as your commit count grows, and you set the thresholds.</p>
+        <div class="stages">
+          <div class="stage"><div class="e">🥚</div><div class="n">Egg</div><div class="c">0 commits</div></div>
+          <div class="arrow">›</div>
+          <div class="stage"><div class="e">🦀</div><div class="n">Hatchling</div><div class="c">5 commits</div></div>
+          <div class="arrow">›</div>
+          <div class="stage"><div class="e">🔥</div><div class="n">Blaze</div><div class="c">15 commits</div></div>
+          <div class="arrow">›</div>
+          <div class="stage"><div class="e">🔥</div><div class="n">Inferno</div><div class="c">35 commits</div></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="privacy" style="padding-top: 0;">
+      <div class="wrap">
+        <div class="privacy-box">
+          <div class="lock">🔒</div>
+          <h2 class="section-title" style="font-size: 24px;">No accounts, no tracking</h2>
+          <p>Claude Crab has <b>no backend</b>. In Local mode it makes no network requests at all. In GitHub mode it talks only to GitHub, to read your own commit counts. <b>Nothing is uploaded and nothing is sold.</b></p>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <div class="wrap">
+        Built with Electron. Open source under the MIT license.<br />
+        <a href="https://github.com/56steve/claude-crab">View the code on GitHub</a>
+      </div>
+    </footer>
+  </body>
+</html>

@@ -67,6 +67,10 @@ npm start
 
 Everything stays on your device. Claude Crab has no backend and sends your data to no one. In Local mode it makes no network requests at all. In GitHub mode it talks only to GitHub, to read your own commit counts, and keeps the sign-in token encrypted on your machine. There are no accounts and no analytics.
 
+## Contributing
+
+Contributions are welcome, including brand new pets. See [CONTRIBUTING.md](CONTRIBUTING.md) for how to get set up and how pets are structured.
+
 ## License
 
 [MIT](LICENSE)
