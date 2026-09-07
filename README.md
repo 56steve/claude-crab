@@ -4,7 +4,7 @@ Claude Crab is a tiny desktop pet that lives on your screen and grows as you com
 
 It is built with [Electron](https://www.electronjs.org/) and runs on **macOS and Windows** from a single codebase.
 
-<!-- TODO: add a screen recording / gif here -->
+![Claude Crab evolving from an egg to a hatchling to Blaze to Inferno as commit count grows](assets/evolution.png)
 
 ## What it does
 
