@@ -1,0 +1,17 @@
+{
+  "//": "Default config shipped with Claude Crab. Your personal settings (which emails count as you, and which folder to watch) are collected on first run and saved separately in the app's userData folder — they never live here. Edit this only to change the evolution ladder or scan defaults.",
+  "watchRoots": [],
+  "authorEmails": [],
+  "scanDepth": 4,
+  "pollSeconds": 90,
+  "//stages": "min = commits made since you adopted the pet (not lifetime). Egg cracks at 2, hatches at 3.",
+  "stages": [
+    { "name": "Egg",       "min": 0,    "emoji": "🥚" },
+    { "name": "Hatchling", "min": 3,    "emoji": "🦀" },
+    { "name": "Blaze",     "min": 10,   "emoji": "🔥" },
+    { "name": "Inferno",   "min": 30,   "emoji": "🔥" },
+    { "name": "Adult",     "min": 100,  "emoji": "🦀" },
+    { "name": "Elder",     "min": 300,  "emoji": "🦀" },
+    { "name": "Legendary", "min": 750,  "emoji": "👑" }
+  ]
+}

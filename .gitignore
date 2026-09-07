@@ -1,0 +1,18 @@
+# dependencies
+node_modules/
+
+# build output
+dist/
+out/
+
+# logs & os cruft
+*.log
+.DS_Store
+Thumbs.db
+
+# local editor
+.vscode/
+.idea/
+
+# per-user runtime config/state is stored in the OS userData folder,
+# never in the repo — nothing to ignore here, just noting it.

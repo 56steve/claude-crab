@@ -1,0 +1,18 @@
+{
+  "name": "claude-crab",
+  "version": "1.0.0",
+  "description": "A Claude crab desktop pet that evolves as you commit code.",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "author": "56steve",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/56steve/claude-crab.git"
+  },
+  "devDependencies": {
+    "electron": "^33.2.1"
+  }
+}

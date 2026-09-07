@@ -1,0 +1,203 @@
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body {
+  width: 200px;
+  height: 224px;
+  background: transparent;
+  overflow: hidden;
+  font-family: -apple-system, "SF Pro Rounded", "SF Pro Text", "Segoe UI", system-ui, sans-serif;
+  user-select: none;
+  -webkit-user-select: none;
+  cursor: default;
+}
+
+#stage-root {
+  position: relative;
+  width: 200px;
+  height: 224px;
+}
+
+/* ---- pixel crab coloring ---- */
+.shadow    { display: none; }
+.pix-fill  { fill: url(#pixOrange); }
+.eye       { fill: #201d1b; }
+.eye-shine { fill: #ffffff; }
+
+/* stage tints for later (placeholder) evolutions */
+.stage-elder    .pix-fill { fill: #d95f2b; }
+.stage-legendary .crab-only { filter: url(#glow); }
+
+/* ---- fire form (Blaze 10+, Inferno 30+) ---- */
+.fire { display: none; }
+.stage-blaze .fire, .stage-inferno .fire { display: block; }
+.stage-blaze .pix-fill, .stage-inferno .pix-fill { fill: url(#pixFire); }
+
+/* ---- inferno extras: goggles + lightning (30+ commits) ---- */
+.goggles, .lightning { display: none; }
+.stage-inferno .goggles, .stage-inferno .lightning { display: block; }
+.stage-inferno .eyes { display: none; }
+.ggl-strap  { fill: #241611; stroke: #12100d; stroke-width: 1.5; }
+.ggl-lens   { fill: url(#goggleLens); stroke: #3a2416; stroke-width: 2; }
+.ggl-shine  { stroke: #fff3c0; stroke-width: 3; stroke-linecap: round; opacity: .85; }
+.ggl-buckle { fill: #3a2416; }
+.glow { fill: none; stroke: #ffdf6a; stroke-width: 6; opacity: .45; stroke-linejoin: round; stroke-linecap: round; }
+.core { fill: none; stroke: #fff8d8; stroke-width: 2.5; stroke-linejoin: round; stroke-linecap: round; }
+.bolt-set { opacity: 0; }
+.stage-inferno .bolt-set    { animation: zap 1.2s steps(1, end) infinite; }
+.stage-inferno .bolt-set.b2 { animation-duration: 1.5s; animation-delay: .4s; }
+.stage-inferno .bolt-set.b3 { animation-duration: 1.05s; animation-delay: .7s; }
+@keyframes zap { 0%,15% { opacity: 1; } 19%,100% { opacity: 0; } }
+.flame { fill: url(#flame); transform-box: fill-box; transform-origin: 50% 100%; animation: flick 0.55s ease-in-out infinite alternate; }
+.flame.core { fill: url(#flameCore); }
+.flame.f2 { animation-delay: .08s; animation-duration: .42s; }
+.flame.f3 { animation-delay: .16s; animation-duration: .48s; }
+.flame.f4 { animation-delay: .05s; animation-duration: .50s; }
+.flame.f5 { animation-delay: .20s; animation-duration: .40s; }
+.flame.f6 { animation-delay: .12s; animation-duration: .38s; }
+.flame.f7 { animation-delay: .22s; animation-duration: .46s; }
+.flame.f8 { animation-delay: .1s;  animation-duration: .43s; }
+.flame.fL { animation-duration: .46s; }
+.flame.fR { animation-delay: .15s; animation-duration: .44s; }
+@keyframes flick {
+  0%   { transform: scaleY(.88) scaleX(1.04); opacity: .85; }
+  100% { transform: scaleY(1.14) scaleX(.94) translateY(-2px); opacity: 1; }
+}
+/* removed: the semi-transparent glow disc tinted the transparent desktop as a dark circle */
+.fire-glow { display: none; }
+.ember { fill: #ffae4d; transform-box: fill-box; animation: rise 1.7s linear infinite; }
+.ember.e2 { animation-delay: .5s; } .ember.e3 { animation-delay: .9s; }
+.ember.e4 { animation-delay: .3s; } .ember.e5 { animation-delay: 1.2s; }
+.ember.e6 { animation-delay: .7s; } .ember.e7 { animation-delay: .2s; }
+.ember.e8 { animation-delay: 1.0s; }
+@keyframes rise { 0% { transform: translateY(8px); opacity: 0; } 15% { opacity: 1; } 100% { transform: translateY(-40px); opacity: 0; } }
+
+/* ---- egg ---- */
+.egg-body  { fill: #fbecd6; stroke: #cf7a3a; stroke-width: 5; }
+.egg-gloss { fill: #ffffff; opacity: 0.5; }
+.egg-speck { fill: #e6a86a; opacity: 0.7; }
+.egg-crack { fill: none; stroke: #9a5a28; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; opacity: 0; transition: opacity 0.3s; }
+#stage-root.cracking .egg-crack { opacity: 1; }
+
+/* show egg vs crab */
+.crab-only { display: none; }
+.egg-only  { display: none; }
+.stage-egg .egg-only { display: block; }
+#stage-root:not(.stage-egg) .crab-only { display: block; }
+
+/* ---- pet: draggable, bobbing, per-stage scale ---- */
+.pet svg { width: 200px; height: 224px; display: block; }
+.pet {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 200px;
+  height: 224px;
+  -webkit-app-region: drag;
+  transform-origin: 100px 182px;
+  animation: bob 3.4s ease-in-out infinite;
+}
+.stage-egg .pet       { scale: 0.38; }
+.stage-hatchling .pet { scale: 0.42; }
+.stage-blaze .pet     { scale: 0.48; }
+.stage-inferno .pet   { scale: 0.54; }
+.stage-adult .pet     { scale: 0.56; }
+.stage-elder .pet     { scale: 0.60; }
+.stage-legendary .pet { scale: 0.66; }
+
+@keyframes bob { 0%,100%{ translate: 0 0; } 50%{ translate: 0 -6px; } }
+.shadow { animation: shadowPulse 3.4s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+@keyframes shadowPulse { 0%,100%{ opacity: 0.55; scale: 1; } 50%{ opacity: 0.36; scale: 0.86 1; } }
+
+/* arms wave */
+.pix-fill:nth-child(2) { transform-box: fill-box; transform-origin: right center; animation: armL 2.2s ease-in-out infinite; }
+.pix-fill:nth-child(3) { transform-box: fill-box; transform-origin: left center; animation: armR 2.2s ease-in-out infinite; }
+@keyframes armL { 0%,100%{ rotate: 0deg; } 50%{ rotate: -7deg; } }
+@keyframes armR { 0%,100%{ rotate: 0deg; } 50%{ rotate: 7deg; } }
+
+/* eyes blink */
+.eye { animation: blink 5s infinite; transform-box: fill-box; transform-origin: center; }
+@keyframes blink { 0%,93%,100%{ scale: 1 1; } 96%{ scale: 1 0.12; } }
+
+/* egg wobble while cracking */
+#stage-root.cracking .egg-shake { transform-box: fill-box; transform-origin: 100px 150px; animation: wobble 0.45s ease-in-out infinite; }
+@keyframes wobble { 0%,100%{ rotate: -3.5deg; } 50%{ rotate: 3.5deg; } }
+
+/* hatch pop when egg -> crab */
+#stage-root.hatch .crab-only { transform-box: view-box; transform-origin: 100px 150px; animation: pop 0.8s cubic-bezier(.2,1.35,.35,1); }
+@keyframes pop { 0%{ scale: 0; } 55%{ scale: 1.18; } 78%{ scale: 0.94; } 100%{ scale: 1; } }
+
+/* sparkles when happy/hatching */
+.sparkles { opacity: 0; }
+.spark { fill: #ffd15c; font-size: 20px; }
+#stage-root[data-happy="true"] .sparkles { animation: sparkle 1.4s ease-out; }
+@keyframes sparkle { 0%{ opacity:0; scale:0.4; } 30%{ opacity:1; scale:1.15; } 100%{ opacity:0; scale:0.85; } }
+
+/* happy dance (commit reaction, once hatched) */
+#stage-root[data-happy="true"]:not(.stage-egg):not(.hatch) .pet { animation: dance 0.55s ease-in-out 3; }
+@keyframes dance {
+  0%,100% { rotate: 0deg; translate: 0 0; }
+  25% { rotate: -8deg; translate: 0 -10px; }
+  75% { rotate: 8deg; translate: 0 -10px; }
+}
+
+
+/* keep the bubble hugging the crab, clearing the flames on fiery forms */
+.stage-blaze .bubble { bottom: 104px; }
+.stage-inferno .bubble { bottom: 112px; }
+/* ---- speech bubble ---- */
+.bubble {
+  position: absolute;
+  top: auto; bottom: 96px; left: 16px; right: 16px;
+  background: linear-gradient(160deg, rgba(38,28,20,0.96), rgba(24,18,13,0.97));
+  color: #fff5ea;
+  border: 1.5px solid rgba(255,168,74,0.45);
+  border-radius: 12px;
+  padding: 7px 9px 8px;
+  opacity: 0;
+  transform: translateY(-6px) scale(0.96);
+  transform-origin: bottom center;
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  -webkit-app-region: no-drag;
+  box-shadow: 0 10px 26px rgba(0,0,0,0.4);
+  z-index: 5;
+}
+.bubble::after {
+  content: "";
+  position: absolute;
+  bottom: -8px; left: 50%;
+  margin-left: -7px;
+  border: 7px solid transparent;
+  border-top-color: rgba(24,18,13,0.97);
+  border-bottom: 0;
+}
+#stage-root:hover .bubble,
+#stage-root[data-happy="true"] .bubble {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
+}
+.bubble-head { display: flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 700; color: #ffb765; }
+.b-emoji { font-size: 12px; }
+.bubble-big { margin-top: 2px; font-size: 10px; color: #cdb69f; }
+.bubble-big b { font-size: 16px; font-weight: 800; color: #fff; }
+.bubble-big .unit { font-size: 9px; }
+.bubble-sub { display: flex; gap: 5px; margin-top: 5px; }
+.pill { background: rgba(255,255,255,0.09); border-radius: 20px; padding: 1px 6px; font-size: 8.5px; color: #ffe4c4; }
+.pill span { font-weight: 700; color: #fff; }
+.progress { margin-top: 6px; height: 5px; background: rgba(255,255,255,0.12); border-radius: 5px; overflow: hidden; }
+.progress-fill { height: 100%; width: 0%; background: linear-gradient(90deg, #ffc879, #ff7a10); border-radius: 5px; transition: width 0.6s cubic-bezier(.2,.8,.2,1); }
+.bubble-next { margin-top: 5px; font-size: 9px; font-weight: 600; color: #ffcf96; }
+.bubble-foot { margin-top: 4px; font-size: 8px; color: #9c8974; }
+#close {
+  position: absolute;
+  top: 6px; right: 7px;
+  width: 17px; height: 17px;
+  border: none; border-radius: 50%;
+  background: rgba(255,255,255,0.12);
+  color: #fff; font-size: 12px; line-height: 15px;
+  cursor: pointer;
+  -webkit-app-region: no-drag;
+  transition: background 0.15s;
+}
+#close:hover { background: #ef7a12; }
