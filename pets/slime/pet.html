@@ -1,0 +1,85 @@
+<style>
+  /* visibility per stage */
+  .slime-egg-art { display: none; }
+  .slime-body { display: none; }
+  .slime-egg .slime-egg-art { display: block; }
+  #stage-root:not(.slime-egg) .slime-body { display: block; }
+
+  .slime-bubbles { display: none; }
+  .slime-mid .slime-bubbles, .slime-titan .slime-bubbles { display: block; }
+  .slime-crown { display: none; }
+  .slime-titan .slime-crown { display: block; }
+
+  /* color deepens as it grows */
+  .slime-fill { fill: #7ed957; stroke: #2c7a45; stroke-width: 5; stroke-linejoin: round; }
+  .slime-mid .slime-fill { fill: #4bc98a; }
+  .slime-titan .slime-fill { fill: #2f9e6a; }
+
+  /* per-stage scale */
+  .slime-egg .pet   { scale: 0.40; }
+  .slime-baby .pet  { scale: 0.44; }
+  .slime-mid .pet   { scale: 0.52; }
+  .slime-titan .pet { scale: 0.60; }
+
+  /* idle jiggle */
+  .slime-blob { transform-box: fill-box; transform-origin: 50% 100%; animation: sjiggle 2.2s ease-in-out infinite; }
+  @keyframes sjiggle { 0%,100% { transform: scaleY(1) scaleX(1); } 50% { transform: scaleY(0.94) scaleX(1.05); } }
+
+  /* blink */
+  .slime-eye { transform-box: fill-box; transform-origin: center; animation: sblink 5s infinite; }
+  @keyframes sblink { 0%,93%,100% { scale: 1 1; } 96% { scale: 1 0.12; } }
+
+  /* rising bubbles */
+  .sbub { fill: #d7fff0; opacity: 0.85; transform-box: fill-box; animation: srise 2.4s linear infinite; }
+  .sbub.s2 { animation-delay: 0.8s; } .sbub.s3 { animation-delay: 1.5s; }
+  @keyframes srise { 0% { transform: translateY(6px); opacity: 0; } 20% { opacity: 0.85; } 100% { transform: translateY(-42px); opacity: 0; } }
+
+  /* egg cracking + hatch (generic hooks) */
+  .slime-crack { fill: none; stroke: #3f7a4c; stroke-width: 3; stroke-linecap: round; opacity: 0; transition: opacity 0.3s; }
+  #stage-root.cracking .slime-crack { opacity: 1; }
+  #stage-root.cracking .slime-egg-art { transform-box: fill-box; transform-origin: 100px 150px; animation: swobble 0.45s ease-in-out infinite; }
+  @keyframes swobble { 0%,100% { rotate: -3.5deg; } 50% { rotate: 3.5deg; } }
+  #stage-root.hatch .slime-body { transform-box: view-box; transform-origin: 100px 150px; animation: spop 0.8s cubic-bezier(.2,1.35,.35,1); }
+  @keyframes spop { 0% { scale: 0; } 55% { scale: 1.18; } 78% { scale: 0.94; } 100% { scale: 1; } }
+
+  /* happy dance */
+  #stage-root[data-happy="true"]:not(.slime-egg):not(.hatch) .pet { animation: sdance 0.55s ease-in-out 3; }
+  @keyframes sdance {
+    0%,100% { rotate: 0deg; translate: 0 0; }
+    25% { rotate: -6deg; translate: 0 -9px; }
+    75% { rotate: 6deg; translate: 0 -9px; }
+  }
+</style>
+
+<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <!-- EGG -->
+  <g class="slime-egg-art">
+    <ellipse cx="100" cy="112" rx="38" ry="48" fill="#dff5e0" stroke="#4ba05f" stroke-width="5" />
+    <ellipse cx="88" cy="96" rx="10" ry="15" fill="#ffffff" opacity="0.5" />
+    <circle cx="112" cy="124" r="3.5" fill="#a9d9b0" />
+    <circle cx="92" cy="138" r="2.6" fill="#a9d9b0" />
+    <path class="slime-crack" d="M84 100 l9 8 l-7 8 l10 7" />
+    <path class="slime-crack" d="M116 92 l-8 8 l8 7 l-9 8" />
+  </g>
+
+  <!-- SLIME -->
+  <g class="slime-body">
+    <g class="slime-crown">
+      <polygon points="78,80 90,58 100,76 110,58 122,80" fill="#ffcf5c" stroke="#d99a26" stroke-width="2.5" stroke-linejoin="round" />
+    </g>
+    <g class="slime-bubbles">
+      <circle class="sbub s1" cx="60" cy="120" r="5" />
+      <circle class="sbub s2" cx="140" cy="126" r="6" />
+      <circle class="sbub s3" cx="150" cy="110" r="4" />
+    </g>
+    <g class="slime-blob">
+      <path class="slime-fill" d="M34 158 Q34 82 100 82 Q166 82 166 158 Z" />
+      <path d="M66 74 Q100 66 134 74" stroke="#eafff0" stroke-width="7" fill="none" stroke-linecap="round" opacity="0.55" />
+      <ellipse cx="82" cy="120" rx="11" ry="13" fill="#ffffff" />
+      <ellipse cx="118" cy="120" rx="11" ry="13" fill="#ffffff" />
+      <circle class="slime-eye" cx="84" cy="124" r="5" fill="#20321d" />
+      <circle class="slime-eye" cx="120" cy="124" r="5" fill="#20321d" />
+      <path d="M88 142 Q100 150 112 142" stroke="#20321d" stroke-width="4" fill="none" stroke-linecap="round" />
+    </g>
+  </g>
+</svg>

@@ -1,0 +1,11 @@
+{
+  "id": "crab",
+  "name": "Claude Crab",
+  "author": "56steve",
+  "stages": [
+    { "name": "Egg",       "emoji": "🥚", "class": "stage-egg",       "defaultMin": 0 },
+    { "name": "Hatchling", "emoji": "🦀", "class": "stage-hatchling", "defaultMin": 5 },
+    { "name": "Blaze",     "emoji": "🔥", "class": "stage-blaze",     "defaultMin": 15 },
+    { "name": "Inferno",   "emoji": "🔥", "class": "stage-inferno",   "defaultMin": 35 }
+  ]
+}

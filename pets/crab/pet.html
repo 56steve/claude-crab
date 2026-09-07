@@ -1,0 +1,240 @@
+<style>
+  /* ---- pixel crab coloring ---- */
+  .shadow    { display: none; }
+  .pix-fill  { fill: url(#pixOrange); }
+  .eye       { fill: #201d1b; }
+  .eye-shine { fill: #ffffff; }
+
+  /* ---- fire form (Blaze, Inferno) ---- */
+  .fire { display: none; }
+  .stage-blaze .fire, .stage-inferno .fire { display: block; }
+  .stage-blaze .pix-fill, .stage-inferno .pix-fill { fill: url(#pixFire); }
+
+  /* ---- inferno extras: goggles + lightning ---- */
+  .goggles, .lightning { display: none; }
+  .stage-inferno .goggles, .stage-inferno .lightning { display: block; }
+  .stage-inferno .eyes { display: none; }
+  .ggl-strap  { fill: #241611; stroke: #12100d; stroke-width: 1.5; }
+  .ggl-lens   { fill: url(#goggleLens); stroke: #3a2416; stroke-width: 2; }
+  .ggl-shine  { stroke: #fff3c0; stroke-width: 3; stroke-linecap: round; opacity: .85; }
+  .ggl-buckle { fill: #3a2416; }
+  .glow { fill: none; stroke: #ffdf6a; stroke-width: 6; opacity: .45; stroke-linejoin: round; stroke-linecap: round; }
+  .core { fill: none; stroke: #fff8d8; stroke-width: 2.5; stroke-linejoin: round; stroke-linecap: round; }
+  .bolt-set { opacity: 0; }
+  .stage-inferno .bolt-set    { animation: zap 1.2s steps(1, end) infinite; }
+  .stage-inferno .bolt-set.b2 { animation-duration: 1.5s; animation-delay: .4s; }
+  .stage-inferno .bolt-set.b3 { animation-duration: 1.05s; animation-delay: .7s; }
+  @keyframes zap { 0%,15% { opacity: 1; } 19%,100% { opacity: 0; } }
+  .flame { fill: url(#flame); transform-box: fill-box; transform-origin: 50% 100%; animation: flick 0.55s ease-in-out infinite alternate; }
+  .flame.core { fill: url(#flameCore); }
+  .flame.f2 { animation-delay: .08s; animation-duration: .42s; }
+  .flame.f3 { animation-delay: .16s; animation-duration: .48s; }
+  .flame.f4 { animation-delay: .05s; animation-duration: .50s; }
+  .flame.f5 { animation-delay: .20s; animation-duration: .40s; }
+  .flame.f6 { animation-delay: .12s; animation-duration: .38s; }
+  .flame.f7 { animation-delay: .22s; animation-duration: .46s; }
+  .flame.f8 { animation-delay: .1s;  animation-duration: .43s; }
+  .flame.fL { animation-duration: .46s; }
+  .flame.fR { animation-delay: .15s; animation-duration: .44s; }
+  @keyframes flick {
+    0%   { transform: scaleY(.88) scaleX(1.04); opacity: .85; }
+    100% { transform: scaleY(1.14) scaleX(.94) translateY(-2px); opacity: 1; }
+  }
+  .fire-glow { display: none; }
+  .ember { fill: #ffae4d; transform-box: fill-box; animation: rise 1.7s linear infinite; }
+  .ember.e2 { animation-delay: .5s; } .ember.e3 { animation-delay: .9s; }
+  .ember.e4 { animation-delay: .3s; } .ember.e5 { animation-delay: 1.2s; }
+  .ember.e6 { animation-delay: .7s; } .ember.e7 { animation-delay: .2s; }
+  .ember.e8 { animation-delay: 1.0s; }
+  @keyframes rise { 0% { transform: translateY(8px); opacity: 0; } 15% { opacity: 1; } 100% { transform: translateY(-40px); opacity: 0; } }
+
+  /* ---- egg ---- */
+  .egg-body  { fill: #fbecd6; stroke: #cf7a3a; stroke-width: 5; }
+  .egg-gloss { fill: #ffffff; opacity: 0.5; }
+  .egg-speck { fill: #e6a86a; opacity: 0.7; }
+  .egg-crack { fill: none; stroke: #9a5a28; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; opacity: 0; transition: opacity 0.3s; }
+  #stage-root.cracking .egg-crack { opacity: 1; }
+
+  /* show egg vs crab */
+  .crab-only { display: none; }
+  .egg-only  { display: none; }
+  .stage-egg .egg-only { display: block; }
+  #stage-root:not(.stage-egg) .crab-only { display: block; }
+
+  /* per-stage scale */
+  .stage-egg .pet       { scale: 0.38; }
+  .stage-hatchling .pet { scale: 0.42; }
+  .stage-blaze .pet     { scale: 0.48; }
+  .stage-inferno .pet   { scale: 0.54; }
+
+  /* keep the bubble clear of the flames on fiery forms */
+  .stage-blaze .bubble { bottom: 104px; }
+  .stage-inferno .bubble { bottom: 112px; }
+
+  /* arms wave */
+  .pix-fill:nth-child(2) { transform-box: fill-box; transform-origin: right center; animation: armL 2.2s ease-in-out infinite; }
+  .pix-fill:nth-child(3) { transform-box: fill-box; transform-origin: left center; animation: armR 2.2s ease-in-out infinite; }
+  @keyframes armL { 0%,100%{ rotate: 0deg; } 50%{ rotate: -7deg; } }
+  @keyframes armR { 0%,100%{ rotate: 0deg; } 50%{ rotate: 7deg; } }
+
+  /* eyes blink */
+  .eye { animation: blink 5s infinite; transform-box: fill-box; transform-origin: center; }
+  @keyframes blink { 0%,93%,100%{ scale: 1 1; } 96%{ scale: 1 0.12; } }
+
+  /* egg wobble while cracking */
+  #stage-root.cracking .egg-shake { transform-box: fill-box; transform-origin: 100px 150px; animation: wobble 0.45s ease-in-out infinite; }
+  @keyframes wobble { 0%,100%{ rotate: -3.5deg; } 50%{ rotate: 3.5deg; } }
+
+  /* hatch pop when egg -> crab */
+  #stage-root.hatch .crab-only { transform-box: view-box; transform-origin: 100px 150px; animation: pop 0.8s cubic-bezier(.2,1.35,.35,1); }
+  @keyframes pop { 0%{ scale: 0; } 55%{ scale: 1.18; } 78%{ scale: 0.94; } 100%{ scale: 1; } }
+
+  /* sparkles when happy/hatching */
+  .sparkles { opacity: 0; }
+  .spark { fill: #ffd15c; font-size: 20px; }
+  #stage-root[data-happy="true"] .sparkles { animation: sparkle 1.4s ease-out; }
+  @keyframes sparkle { 0%{ opacity:0; scale:0.4; } 30%{ opacity:1; scale:1.15; } 100%{ opacity:0; scale:0.85; } }
+
+  /* happy dance (commit reaction, once hatched) */
+  #stage-root[data-happy="true"]:not(.stage-egg):not(.hatch) .pet { animation: dance 0.55s ease-in-out 3; }
+  @keyframes dance {
+    0%,100% { rotate: 0deg; translate: 0 0; }
+    25% { rotate: -8deg; translate: 0 -10px; }
+    75% { rotate: 8deg; translate: 0 -10px; }
+  }
+</style>
+
+<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="pixOrange" gradientUnits="userSpaceOnUse" x1="100" y1="46" x2="100" y2="172">
+      <stop offset="0%" stop-color="#f5814f" />
+      <stop offset="55%" stop-color="#f26a3d" />
+      <stop offset="100%" stop-color="#e85e2f" />
+    </linearGradient>
+    <filter id="pix-outline" x="-25%" y="-25%" width="150%" height="150%">
+      <feMorphology in="SourceAlpha" operator="dilate" radius="5" result="d1" />
+      <feFlood flood-color="#9e3117" result="c1" />
+      <feComposite in="c1" in2="d1" operator="in" result="dark" />
+      <feMorphology in="SourceAlpha" operator="dilate" radius="2.4" result="d2" />
+      <feFlood flood-color="#ffb98f" result="c2" />
+      <feComposite in="c2" in2="d2" operator="in" result="rim" />
+      <feMerge>
+        <feMergeNode in="dark" />
+        <feMergeNode in="rim" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="5" result="b" />
+      <feMerge><feMergeNode in="b" /><feMergeNode in="SourceGraphic" /></feMerge>
+    </filter>
+    <linearGradient id="flame" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0%" stop-color="#e0400f" />
+      <stop offset="45%" stop-color="#ff7a12" />
+      <stop offset="100%" stop-color="#ffd24a" />
+    </linearGradient>
+    <linearGradient id="flameCore" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0%" stop-color="#ff8a1e" />
+      <stop offset="100%" stop-color="#fff0a8" />
+    </linearGradient>
+    <linearGradient id="pixFire" gradientUnits="userSpaceOnUse" x1="100" y1="46" x2="100" y2="172">
+      <stop offset="0%" stop-color="#ff7a2e" />
+      <stop offset="100%" stop-color="#d8431a" />
+    </linearGradient>
+    <linearGradient id="goggleLens" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#ffe27a" />
+      <stop offset="45%" stop-color="#ff6a1a" />
+      <stop offset="100%" stop-color="#c81e10" />
+    </linearGradient>
+  </defs>
+
+  <ellipse class="shadow" cx="100" cy="182" rx="56" ry="10" />
+
+  <!-- EGG -->
+  <g class="egg-only">
+    <g class="egg-shake">
+      <ellipse class="egg-body" cx="100" cy="104" rx="40" ry="50" />
+      <ellipse class="egg-gloss" cx="86" cy="86" rx="12" ry="18" />
+      <circle class="egg-speck" cx="112" cy="118" r="4" />
+      <circle class="egg-speck" cx="90" cy="132" r="3" />
+      <circle class="egg-speck" cx="116" cy="92" r="2.6" />
+      <path class="egg-crack" d="M78 96 l10 8 l-8 9 l12 7 l-9 9" />
+      <path class="egg-crack" d="M122 84 l-9 9 l9 8 l-11 8 l8 9" />
+      <path class="egg-crack" d="M100 60 l-6 12 l8 6 l-6 10" />
+    </g>
+  </g>
+
+  <!-- PIXEL CRAB -->
+  <g class="crab-only">
+    <g class="fire">
+      <ellipse class="fire-glow" cx="100" cy="102" rx="86" ry="96" />
+      <path class="flame side fL" d="M21,104 Q20,84 30,66 Q40,84 39,104 Q35,99 30,101 Q25,99 21,104 Z" />
+      <path class="flame side fR" d="M161,104 Q160,84 170,66 Q180,84 179,104 Q175,99 170,101 Q165,99 161,104 Z" />
+      <path class="flame f4" d="M46,58 Q44,44 56,30 Q68,44 66,58 Q61,54 56,56 Q51,54 46,58 Z" />
+      <path class="flame f5" d="M132,58 Q130,43 144,28 Q158,43 156,58 Q151,54 144,56 Q137,54 132,58 Z" />
+      <path class="flame f2" d="M62,56 Q60,36 76,16 Q92,36 90,56 Q83,51 76,54 Q69,51 62,56 Z" />
+      <path class="flame f3" d="M110,56 Q108,34 124,14 Q140,34 138,56 Q131,51 124,54 Q117,51 110,56 Z" />
+      <path class="flame f7" d="M79,56 Q78,44 88,34 Q98,44 97,56 Q93,52 88,54 Q83,52 79,56 Z" />
+      <path class="flame f8" d="M103,56 Q102,43 112,32 Q122,43 121,56 Q117,52 112,54 Q107,52 103,56 Z" />
+      <path class="flame f1" d="M76,56 Q74,30 100,4 Q126,30 124,56 Q112,50 100,54 Q88,50 76,56 Z" />
+      <path class="flame core f6" d="M88,54 Q86,36 100,18 Q114,36 112,54 Q106,49 100,52 Q94,49 88,54 Z" />
+      <rect class="ember e1" x="46" y="40" width="5" height="5" />
+      <rect class="ember e2" x="150" y="44" width="5" height="5" />
+      <rect class="ember e3" x="70" y="16" width="4" height="4" />
+      <rect class="ember e4" x="128" y="20" width="4" height="4" />
+      <rect class="ember e5" x="100" y="4" width="4" height="4" />
+      <rect class="ember e6" x="38" y="72" width="4" height="4" />
+      <rect class="ember e7" x="162" y="88" width="5" height="5" />
+      <rect class="ember e8" x="150" y="120" width="4" height="4" />
+    </g>
+
+    <g class="pix" filter="url(#pix-outline)">
+      <rect class="pix-fill" x="44" y="52" width="112" height="92" />
+      <rect class="pix-fill" x="20" y="76" width="28" height="30" />
+      <rect class="pix-fill" x="152" y="76" width="28" height="30" />
+      <rect class="pix-fill" x="44" y="132" width="16" height="34" />
+      <rect class="pix-fill" x="72" y="132" width="16" height="34" />
+      <rect class="pix-fill" x="112" y="132" width="16" height="34" />
+      <rect class="pix-fill" x="140" y="132" width="16" height="34" />
+    </g>
+
+    <g class="eyes">
+      <rect class="eye" x="59" y="67" width="18" height="18" />
+      <rect class="eye" x="123" y="67" width="18" height="18" />
+    </g>
+
+    <g class="goggles">
+      <rect class="ggl-strap" x="34" y="70" width="134" height="30" rx="14" />
+      <rect class="ggl-lens" x="44" y="74" width="52" height="22" rx="9" />
+      <rect class="ggl-lens" x="104" y="74" width="52" height="22" rx="9" />
+      <path class="ggl-shine" d="M52 93 L66 77" />
+      <path class="ggl-shine" d="M61 93 L75 77" />
+      <path class="ggl-shine" d="M112 93 L126 77" />
+      <path class="ggl-shine" d="M121 93 L135 77" />
+      <rect class="ggl-buckle" x="160" y="79" width="9" height="12" rx="2" />
+    </g>
+
+    <g class="lightning">
+      <g class="bolt-set b1">
+        <polyline class="glow" points="30,18 43,48 33,52 50,88" />
+        <polyline class="core" points="30,18 43,48 33,52 50,88" />
+      </g>
+      <g class="bolt-set b2">
+        <polyline class="glow" points="172,22 159,50 169,54 152,90" />
+        <polyline class="core" points="172,22 159,50 169,54 152,90" />
+      </g>
+      <g class="bolt-set b3">
+        <polyline class="glow" points="12,98 30,112 21,118 38,134" />
+        <polyline class="core" points="12,98 30,112 21,118 38,134" />
+      </g>
+    </g>
+  </g>
+
+  <g class="sparkles">
+    <text class="spark" x="34" y="66">✦</text>
+    <text class="spark" x="160" y="58">✧</text>
+    <text class="spark" x="164" y="126">✦</text>
+    <text class="spark" x="30" y="120">✧</text>
+    <text class="spark" x="100" y="40">✦</text>
+  </g>
+</svg>

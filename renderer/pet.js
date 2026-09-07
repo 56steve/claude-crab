@@ -1,13 +1,13 @@
 "use strict";
 
-const STAGE_CLASSES = [
-  "stage-egg",
-  "stage-hatchling",
-  "stage-blaze",
-  "stage-inferno",
-];
+// Stage classes are provided by the selected pet pack at load time. This is a
+// safe fallback for the crab so something renders if loading fails.
+let STAGE_CLASSES = ["stage-egg", "stage-hatchling", "stage-blaze", "stage-inferno"];
+// In browser dev preview the mock uses the pack's own stage names/emojis.
+let PET_STAGES = null;
 
 const root = document.getElementById("stage-root");
+const petEl = document.getElementById("pet");
 const el = {
   emoji: document.getElementById("b-emoji"),
   stage: document.getElementById("b-stage"),
@@ -26,7 +26,7 @@ let lastStageIndex = null;
 function applyStage(index) {
   // Only remove stage classes so transient classes (cracking/hatch) survive.
   root.classList.remove(...STAGE_CLASSES);
-  root.classList.add(STAGE_CLASSES[Math.min(index, STAGE_CLASSES.length - 1)] || "stage-egg");
+  root.classList.add(STAGE_CLASSES[Math.min(index, STAGE_CLASSES.length - 1)] || STAGE_CLASSES[0]);
 }
 
 function celebrate() {
@@ -51,8 +51,8 @@ function render(s) {
   if (lastStageIndex === 0 && s.stageIndex >= 1) hatch();
   lastStageIndex = s.stageIndex;
 
-  el.emoji.textContent = s.stageEmoji || "🦀";
-  el.stage.textContent = s.stageName || "Crab";
+  el.emoji.textContent = s.stageEmoji || "🥚";
+  el.stage.textContent = s.stageName || "Pet";
   el.count.textContent = s.progress;
   el.today.textContent = s.today;
   el.week.textContent = s.week;
@@ -80,17 +80,54 @@ function render(s) {
   }
 }
 
+// ---- load the selected pet pack and inject its artwork -----------------------
+async function loadPet() {
+  const params = new URLSearchParams(location.search);
+  const petId = params.get("pet") || "crab";
+  let pet = null;
+
+  if (window.crab && window.crab.getPet) {
+    try {
+      pet = await window.crab.getPet();
+    } catch {
+      /* fall through to the dev fetch */
+    }
+  }
+  if (!pet) {
+    // Browser dev preview: fetch the pack straight from the pets folder.
+    try {
+      const [html, meta] = await Promise.all([
+        fetch(`../pets/${petId}/pet.html`).then((r) => r.text()),
+        fetch(`../pets/${petId}/pet.json`).then((r) => r.json()),
+      ]);
+      pet = { html, stageClasses: meta.stages.map((s) => s.class) };
+      PET_STAGES = meta.stages;
+    } catch {
+      /* nothing to inject; the fallback classes stay */
+    }
+  }
+  if (pet) {
+    if (pet.html) petEl.innerHTML = pet.html;
+    if (Array.isArray(pet.stageClasses) && pet.stageClasses.length) {
+      STAGE_CLASSES = pet.stageClasses;
+    }
+  }
+}
+
 // ---- bridge (real Electron) or a mock for browser preview ----
 function makeMock() {
-  // Preview with ?progress=N (drives stage + egg cracking). e.g. ?progress=2 shows a cracking egg.
   const params = new URLSearchParams(location.search);
-  const mins = [0, 5, 15, 35];
-  const names = ["Egg", "Hatchling", "Blaze", "Inferno"];
-  const emojis = ["🥚", "🦀", "🔥", "🔥"];
+  const stages = PET_STAGES || [
+    { name: "Egg", emoji: "🥚", defaultMin: 0 },
+    { name: "Hatchling", emoji: "🦀", defaultMin: 5 },
+    { name: "Blaze", emoji: "🔥", defaultMin: 15 },
+    { name: "Inferno", emoji: "🔥", defaultMin: 35 },
+  ];
+  const mins = stages.map((s) => s.defaultMin);
   const progress = parseInt(params.get("progress") ?? "0", 10);
   let idx = 0;
   mins.forEach((m, i) => { if (progress >= m) idx = i; });
-  const nextIdx = idx < mins.length - 1 ? idx + 1 : null;
+  const nextIdx = idx < stages.length - 1 ? idx + 1 : null;
   const sample = {
     progress,
     lifetime: 263 + progress,
@@ -98,11 +135,11 @@ function makeMock() {
     week: 21,
     repoCount: 48,
     stageIndex: idx,
-    stageName: names[idx],
-    stageEmoji: emojis[idx],
+    stageName: stages[idx].name,
+    stageEmoji: stages[idx].emoji,
     stageMin: mins[idx],
     nextMin: nextIdx != null ? mins[nextIdx] : null,
-    nextName: nextIdx != null ? names[nextIdx] : null,
+    nextName: nextIdx != null ? stages[nextIdx].name : null,
     justCommitted: false,
     gained: 0,
   };
@@ -113,14 +150,18 @@ function makeMock() {
   };
 }
 
-const bridge = window.crab || makeMock();
-bridge.onStats(render);
-bridge.requestStats();
+(async function start() {
+  await loadPet();
 
-document.getElementById("close").addEventListener("click", (e) => {
-  e.stopPropagation();
-  bridge.hide();
-});
-document.getElementById("pet").addEventListener("click", () => {
-  if (!root.classList.contains("stage-egg")) celebrate();
-});
+  const bridge = window.crab || makeMock();
+  bridge.onStats(render);
+  bridge.requestStats();
+
+  document.getElementById("close").addEventListener("click", (e) => {
+    e.stopPropagation();
+    bridge.hide();
+  });
+  petEl.addEventListener("click", () => {
+    if (!root.classList.contains(STAGE_CLASSES[0])) celebrate();
+  });
+})();

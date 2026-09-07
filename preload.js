@@ -12,12 +12,16 @@ contextBridge.exposeInMainWorld("crab", {
   },
   // Tell main to hide the pet (e.g. user clicked the close dot).
   hide: () => ipcRenderer.send("crab:hide"),
+  // Get the selected pet's artwork and stage classes to render.
+  getPet: () => ipcRenderer.invoke("pet:get"),
 });
 
 // First-run setup bridge (used only by onboard.html).
 contextBridge.exposeInMainWorld("crabSetup", {
   // Detected git email + home dir, to pre-fill the form.
   defaults: () => ipcRenderer.invoke("onboard:defaults"),
+  // Available pet packs to choose from.
+  listPets: () => ipcRenderer.invoke("onboard:list-pets"),
   // Open a native folder picker; resolves to a path or null.
   pickFolder: () => ipcRenderer.invoke("onboard:pick-folder"),
   // GitHub device flow: begin (get + show the code, open the browser).

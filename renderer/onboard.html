@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta
       http-equiv="Content-Security-Policy"
-      content="default-src 'none'; style-src 'self' 'unsafe-inline'; script-src 'self'; img-src 'self' data:;"
+      content="default-src 'none'; style-src 'self' 'unsafe-inline'; script-src 'self'; img-src 'self' data:; connect-src 'self';"
     />
     <title>Adopt your Claude Crab</title>
     <style>
@@ -61,6 +61,23 @@
         font-size: 11px; font-weight: 700; text-transform: uppercase;
         letter-spacing: 0.6px; color: var(--accent-2); margin-bottom: 7px;
       }
+
+      /* pet chooser */
+      .pets { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+      .pet-card {
+        -webkit-app-region: no-drag;
+        cursor: pointer; text-align: left;
+        display: flex; align-items: center; gap: 10px;
+        background: var(--panel); border: 1.5px solid var(--line); border-radius: 10px;
+        padding: 10px 12px; color: var(--text);
+        transition: border-color 0.15s, background 0.15s;
+      }
+      .pet-card:hover { border-color: rgba(255,168,74,0.5); }
+      .pet-card.selected { border-color: var(--accent); background: rgba(255,122,18,0.12); }
+      .pet-card .emos { font-size: 17px; line-height: 1; }
+      .pet-card .meta { display: flex; flex-direction: column; }
+      .pet-card .nm { font-size: 13px; font-weight: 700; }
+      .pet-card .by { font-size: 10px; color: var(--muted); }
 
       /* tracking-mode selector */
       .modes { display: flex; gap: 8px; }
@@ -213,7 +230,12 @@
     <div class="body">
       <div class="egg">🥚</div>
       <h1>Adopt your Claude Crab</h1>
-      <p class="sub">It hatches and grows as you commit code.<br />Pick how it should track your commits.</p>
+      <p class="sub">It hatches and grows as you commit code.<br />Pick your pet and how it should track your commits.</p>
+
+      <div class="field">
+        <div class="label">Choose your pet</div>
+        <div class="pets" id="pets"></div>
+      </div>
 
       <div class="field">
         <div class="label">How to track</div>

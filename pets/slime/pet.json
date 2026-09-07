@@ -1,0 +1,11 @@
+{
+  "id": "slime",
+  "name": "Pixel Slime",
+  "author": "56steve",
+  "stages": [
+    { "name": "Egg",       "emoji": "🥚", "class": "slime-egg",   "defaultMin": 0 },
+    { "name": "Slimeling", "emoji": "🟢", "class": "slime-baby",  "defaultMin": 5 },
+    { "name": "Bubbler",   "emoji": "🫧", "class": "slime-mid",   "defaultMin": 15 },
+    { "name": "Titan",     "emoji": "👑", "class": "slime-titan", "defaultMin": 35 }
+  ]
+}

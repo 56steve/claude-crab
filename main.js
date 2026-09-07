@@ -18,6 +18,7 @@ const path = require("path");
 const { execFile } = require("child_process");
 const { scan } = require("./tracker");
 const github = require("./github");
+const pets = require("./pets");
 const { crabTrayPNG } = require("./tray-icon");
 
 // Defaults shipped with the app (stages, cadence, GitHub client id). Personal
@@ -78,15 +79,19 @@ function saveUserConfig(cfg) {
 function resolveConfig() {
   const defaults = loadDefaults();
   const user = loadUserConfig() || {};
+  const petId = user.petId || defaults.petId || "crab";
+  // Default stages come from the selected pet's ladder; the user's thresholds
+  // (set during setup) win if present.
+  const pet = pets.loadPet(petId);
+  const petStages = pet
+    ? pet.stages.map((s) => ({ name: s.name, min: s.defaultMin, emoji: s.emoji }))
+    : defaults.stages;
   return {
     ...defaults,
     ...user,
-    // Use the user's chosen evolution ladder if they set one during setup,
-    // otherwise fall back to the shipped defaults.
+    petId,
     stages:
-      Array.isArray(user.stages) && user.stages.length
-        ? user.stages
-        : defaults.stages,
+      Array.isArray(user.stages) && user.stages.length ? user.stages : petStages,
   };
 }
 
@@ -487,6 +492,28 @@ app.on("second-instance", () => {
 app.whenReady().then(() => {
   if (app.dock) app.dock.hide(); // desktop pet: no dock icon
 
+  // Pet packs -----------------------------------------------------------------
+  ipcMain.handle("pet:get", () => {
+    const config = resolveConfig();
+    const pet = pets.loadPet(config.petId);
+    if (!pet) return null;
+    return {
+      id: pet.id,
+      name: pet.name,
+      html: pet.html,
+      stageClasses: pet.stages.map((s) => s.class),
+    };
+  });
+
+  ipcMain.handle("onboard:list-pets", () =>
+    pets.listPets().map((p) => ({
+      id: p.id,
+      name: p.name,
+      author: p.author,
+      stages: p.stages,
+    }))
+  );
+
   // First-run onboarding IPC ------------------------------------------------
   ipcMain.handle("onboard:defaults", async () => ({
     email: await detectGitEmail(),
@@ -548,6 +575,7 @@ app.whenReady().then(() => {
     const base = {
       scanDepth: defaults.scanDepth || 4,
       pollSeconds: defaults.pollSeconds || 90,
+      petId: payload.petId || "crab",
       stages,
     };
 

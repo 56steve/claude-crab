@@ -30,12 +30,14 @@ To try the different evolution stages without making real commits, open `rendere
 | `tracker.js` | Local mode: counts commits by scanning git repos. |
 | `github.js` | GitHub mode: device-flow sign-in and the contributions query. |
 | `preload.js` | The safe bridge between the UI and the main process. |
-| `renderer/index.html` | The pet artwork (inline SVG) and the stats bubble. |
-| `renderer/style.css` | Colors, per-stage scaling, and animations. |
-| `renderer/pet.js` | Applies the current stage and renders stats. |
+| `renderer/index.html` | The app shell and the stats bubble. |
+| `renderer/style.css` | Shell styling (the pet container and the bubble). |
+| `renderer/pet.js` | Loads the selected pet pack, applies stages, renders stats. |
 | `renderer/onboard.js` / `onboard.html` | The first-run setup window. |
+| `pets/` | The pet packs (one folder per pet). |
+| `pets.js` | Discovers and loads pet packs. |
 | `tray-icon.js` | Draws the menu-bar / tray icon. |
-| `config.json` | Default evolution stages and scan settings. |
+| `config.json` | Scan settings and the GitHub client id. |
 | `build/` | App icon for packaging. |
 | `docs/` | The landing page (served by GitHub Pages). |
 
@@ -55,15 +57,29 @@ To try the different evolution stages without making real commits, open `rendere
 
 ## Adding a new pet
 
-Right now the crab is defined directly in the renderer and a few helpers, so a new pet means editing these files:
+Pets are self-contained **packs**. To add one, create a folder under `pets/` with two files. Nothing else needs editing, and your pet shows up automatically in the setup window's pet picker.
 
-- `renderer/index.html`: the pet is one inline `<svg>`. Each stage is shown or hidden with CSS. Add your artwork here.
-- `renderer/style.css`: the `.stage-*` rules control which parts of the SVG show at each stage, plus colors, scaling, and animation.
-- `renderer/pet.js`: the `STAGE_CLASSES` list maps stage index to a CSS class.
-- `config.json`: the `stages` array sets the names, emojis, and commit thresholds.
-- `tray-icon.js`: the menu-bar icon, drawn in code.
+**`pets/<id>/pet.json`** is the metadata:
 
-A cleaner **pet packs** system, where each pet is a self-contained folder you can drop in and pick during setup, is planned. If you want to add a pet, please **open an issue first** with a sketch or an SVG so we can agree on the shape before you build it, and so two people do not redraw the same animal. Pixel-art pets that match the existing look are the easiest to accept.
+```json
+{
+  "id": "slime",
+  "name": "Pixel Slime",
+  "author": "your-name",
+  "stages": [
+    { "name": "Egg",       "emoji": "🥚", "class": "slime-egg",  "defaultMin": 0 },
+    { "name": "Slimeling", "emoji": "🟢", "class": "slime-baby", "defaultMin": 5 },
+    { "name": "Bubbler",   "emoji": "🫧", "class": "slime-mid",  "defaultMin": 15 },
+    { "name": "Titan",     "emoji": "👑", "class": "slime-titan", "defaultMin": 35 }
+  ]
+}
+```
+
+The first stage is the egg (`defaultMin` 0). Each stage has a unique CSS `class`. The `defaultMin` values are the default commit thresholds, which a user can still change during setup.
+
+**`pets/<id>/pet.html`** is a `<style>` block followed by the `<svg>` artwork. Use `viewBox="0 0 200 200"`. Show and hide each stage's parts with the stage class, which is applied to `#stage-root`, for example `.slime-baby .slime-body { display: block }`. Set each stage's size with `.slime-baby .pet { scale: 0.44 }`. The generic hooks `#stage-root.cracking`, `#stage-root.hatch`, and `#stage-root[data-happy="true"]` are available for the egg-cracking, hatching, and commit-celebration moments.
+
+Use [`pets/crab/pet.html`](pets/crab/pet.html) and [`pets/slime/pet.html`](pets/slime/pet.html) as references. Please **open an issue first** with a sketch so we can coordinate and avoid two people drawing the same animal. Pixel-art pets that match the existing look are the easiest to accept.
 
 ## Be kind
 
