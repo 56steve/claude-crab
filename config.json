@@ -9,9 +9,6 @@
     { "name": "Egg",       "min": 0,    "emoji": "🥚" },
     { "name": "Hatchling", "min": 3,    "emoji": "🦀" },
     { "name": "Blaze",     "min": 10,   "emoji": "🔥" },
-    { "name": "Inferno",   "min": 30,   "emoji": "🔥" },
-    { "name": "Adult",     "min": 100,  "emoji": "🦀" },
-    { "name": "Elder",     "min": 300,  "emoji": "🦀" },
-    { "name": "Legendary", "min": 750,  "emoji": "👑" }
+    { "name": "Inferno",   "min": 30,   "emoji": "🔥" }
   ]
 }

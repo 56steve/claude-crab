@@ -5,9 +5,6 @@ const STAGE_CLASSES = [
   "stage-hatchling",
   "stage-blaze",
   "stage-inferno",
-  "stage-adult",
-  "stage-elder",
-  "stage-legendary",
 ];
 
 const root = document.getElementById("stage-root");
@@ -74,7 +71,7 @@ function render(s) {
         : `${remaining} more → ${s.nextName}`;
   } else {
     el.bar.style.width = "100%";
-    el.next.textContent = "Max evolution reached 👑";
+    el.next.textContent = "Max evolution reached 🔥";
   }
 
   if (s.justCommitted && s.stageIndex >= 1) {
@@ -87,13 +84,13 @@ function render(s) {
 function makeMock() {
   // Preview with ?progress=N (drives stage + egg cracking). e.g. ?progress=2 shows a cracking egg.
   const params = new URLSearchParams(location.search);
-  const mins = [0, 3, 10, 30, 100, 300, 750];
-  const names = ["Egg", "Hatchling", "Blaze", "Inferno", "Adult", "Elder", "Legendary"];
-  const emojis = ["🥚", "🦀", "🔥", "🔥", "🦀", "🦀", "👑"];
+  const mins = [0, 3, 10, 30];
+  const names = ["Egg", "Hatchling", "Blaze", "Inferno"];
+  const emojis = ["🥚", "🦀", "🔥", "🔥"];
   const progress = parseInt(params.get("progress") ?? "0", 10);
   let idx = 0;
   mins.forEach((m, i) => { if (progress >= m) idx = i; });
-  const nextIdx = idx < 6 ? idx + 1 : null;
+  const nextIdx = idx < mins.length - 1 ? idx + 1 : null;
   const sample = {
     progress,
     lifetime: 263 + progress,

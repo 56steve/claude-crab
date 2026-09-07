@@ -69,16 +69,45 @@ function saveUserConfig(cfg) {
   }
 }
 
-/** Merge shipped defaults with the user's saved watchRoots/authorEmails. */
+/** Merge shipped defaults with the user's saved settings. */
 function resolveConfig() {
   const defaults = loadDefaults();
   const user = loadUserConfig() || {};
   return {
     ...defaults,
     ...user,
-    // stages always come from the shipped defaults (evolution ladder is fixed)
-    stages: defaults.stages,
+    // Use the user's chosen evolution ladder if they set one during setup,
+    // otherwise fall back to the shipped defaults.
+    stages:
+      Array.isArray(user.stages) && user.stages.length
+        ? user.stages
+        : defaults.stages,
   };
+}
+
+/**
+ * Validate a stages array coming from the setup window. Each stage needs a
+ * name, an emoji, and a numeric min, and the mins must strictly increase.
+ * Anything off returns the fallback ladder so a bad payload can't break the pet.
+ */
+function sanitizeStages(stages, fallback) {
+  if (!Array.isArray(stages) || stages.length < 2) return fallback;
+  let prev = -1;
+  for (const s of stages) {
+    if (!s || typeof s.name !== "string" || typeof s.emoji !== "string") {
+      return fallback;
+    }
+    const min = Number(s.min);
+    if (!Number.isFinite(min) || min < 0 || (prev !== -1 && min <= prev)) {
+      return fallback;
+    }
+    prev = min;
+  }
+  return stages.map((s) => ({
+    name: s.name,
+    min: Math.floor(Number(s.min)),
+    emoji: s.emoji,
+  }));
 }
 
 /**
@@ -134,7 +163,7 @@ function crabTrayImage() {
 function createOnboardingWindow() {
   onboardWin = new BrowserWindow({
     width: 460,
-    height: 520,
+    height: 640,
     resizable: false,
     frame: false,
     transparent: false,
@@ -384,11 +413,13 @@ app.whenReady().then(() => {
       .map((s) => String(s).trim())
       .filter(Boolean);
     const folder = String(payload.folder || os.homedir()).trim() || os.homedir();
+    const stages = sanitizeStages(payload.stages, defaults.stages);
     saveUserConfig({
       watchRoots: [folder],
       authorEmails: emails,
       scanDepth: defaults.scanDepth || 4,
       pollSeconds: defaults.pollSeconds || 90,
+      stages,
     });
     if (onboardWin) {
       const w = onboardWin;

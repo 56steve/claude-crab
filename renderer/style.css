@@ -23,10 +23,6 @@ html, body {
 .eye       { fill: #201d1b; }
 .eye-shine { fill: #ffffff; }
 
-/* stage tints for later (placeholder) evolutions */
-.stage-elder    .pix-fill { fill: #d95f2b; }
-.stage-legendary .crab-only { filter: url(#glow); }
-
 /* ---- fire form (Blaze 10+, Inferno 30+) ---- */
 .fire { display: none; }
 .stage-blaze .fire, .stage-inferno .fire { display: block; }
@@ -100,9 +96,6 @@ html, body {
 .stage-hatchling .pet { scale: 0.42; }
 .stage-blaze .pet     { scale: 0.48; }
 .stage-inferno .pet   { scale: 0.54; }
-.stage-adult .pet     { scale: 0.56; }
-.stage-elder .pet     { scale: 0.60; }
-.stage-legendary .pet { scale: 0.66; }
 
 @keyframes bob { 0%,100%{ translate: 0 0; } 50%{ translate: 0 -6px; } }
 .shadow { animation: shadowPulse 3.4s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }

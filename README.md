@@ -1,6 +1,6 @@
 # 🦀 Claude Crab
 
-Claude Crab is a tiny desktop pet that lives on your screen and grows as you commit code. It starts life as an egg, hatches into a baby crab, and evolves all the way to a fiery, goggle wearing legend. Every commit you make feeds it and pushes it toward its next form.
+Claude Crab is a tiny desktop pet that lives on your screen and grows as you commit code. It starts life as an egg, hatches into a baby crab, and evolves into a fiery, goggle wearing inferno. Every commit you make feeds it and pushes it toward its next form.
 
 It is built with [Electron](https://www.electronjs.org/) and runs on **macOS and Windows** from a single codebase.
 
@@ -10,7 +10,7 @@ It is built with [Electron](https://www.electronjs.org/) and runs on **macOS and
 
 - Sits on your desktop as a small, always on top, draggable pixel crab.
 - Watches your git activity in the background and counts the commits you author.
-- Evolves through seven stages as your commit count climbs, from a cracking egg to a crowned legend.
+- Evolves through four stages as your commit count climbs, from a cracking egg to a fiery inferno.
 - Shows a little stats bubble on hover: your commit count, today and this week totals, progress to the next stage, and lifetime numbers.
 - Lives quietly in your menu bar (macOS) or system tray (Windows) with quick actions to refresh, reset to an egg, or edit your settings.
 
@@ -41,9 +41,6 @@ Your answers are saved to the app's per-user config in the operating system's `u
 | 🦀 Hatchling | 3 |
 | 🔥 Blaze | 10 |
 | 🔥 Inferno | 30 |
-| 🦀 Adult | 100 |
-| 🦀 Elder | 300 |
-| 👑 Legendary | 750 |
 
 The thresholds live in [`config.json`](config.json), so you can tune the whole ladder to your own pace.
 
