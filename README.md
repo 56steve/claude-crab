@@ -44,10 +44,10 @@ You also pick an evolution pace (Chill, Normal, or Grind), with an Advanced opti
 
 | Stage | Commits since adoption |
 | --- | --- |
-| 🥚 Egg | 0 (cracks at 2, hatches at 3) |
-| 🦀 Hatchling | 3 |
-| 🔥 Blaze | 10 |
-| 🔥 Inferno | 30 |
+| 🥚 Egg | 0 (cracks at 2, hatches at 5) |
+| 🦀 Hatchling | 5 |
+| 🔥 Blaze | 15 |
+| 🔥 Inferno | 35 |
 
 The thresholds live in [`config.json`](config.json), so you can tune the whole ladder to your own pace.
 

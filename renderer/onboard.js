@@ -14,6 +14,8 @@ const githubDone = document.getElementById("github-done");
 const ghCode = document.getElementById("gh-code");
 const ghUri = document.getElementById("gh-uri");
 const ghLogin = document.getElementById("gh-login");
+// the text label inside the connect button (keep the SVG icon intact)
+const ghBtnLabel = githubConnectBtn.querySelector("span");
 
 // local fields
 const emailsEl = document.getElementById("emails");
@@ -44,9 +46,9 @@ const STAGE_DEFS = [
   { name: "Inferno", emoji: "🔥" },
 ];
 const PRESETS = {
-  chill: [2, 6, 18],
-  normal: [3, 10, 30],
-  grind: [5, 20, 60],
+  chill: [3, 10, 25],
+  normal: [5, 15, 35],
+  grind: [8, 25, 60],
 };
 const stageInputs = [];
 
@@ -167,13 +169,13 @@ modeBtns.forEach((btn) => btn.addEventListener("click", () => setMode(btn.datase
 githubConnectBtn.addEventListener("click", async () => {
   clearError();
   githubConnectBtn.disabled = true;
-  githubConnectBtn.textContent = "Starting…";
+  ghBtnLabel.textContent = "Starting…";
 
   const begin = await setup.githubBegin();
   if (!begin || !begin.ok) {
     setError((begin && begin.error) || "Could not start GitHub sign-in.");
     githubConnectBtn.disabled = false;
-    githubConnectBtn.textContent = "🐙 Connect GitHub";
+    ghBtnLabel.textContent = "Connect GitHub";
     return;
   }
 
@@ -191,7 +193,7 @@ githubConnectBtn.addEventListener("click", async () => {
     githubStatus.hidden = true;
     githubConnectBtn.hidden = false;
     githubConnectBtn.disabled = false;
-    githubConnectBtn.textContent = "🐙 Connect GitHub";
+    ghBtnLabel.textContent = "Connect GitHub";
     return;
   }
 

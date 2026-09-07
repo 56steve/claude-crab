@@ -120,15 +120,20 @@
       }
       .pick:hover { border-color: var(--accent); }
 
+      /* GitHub mark icon */
+      .gh-ico { width: 20px; height: 20px; fill: currentColor; display: block; }
+
       /* GitHub connect */
       .gh-connect {
         -webkit-app-region: no-drag;
         width: 100%; cursor: pointer;
+        display: flex; align-items: center; justify-content: center; gap: 8px;
         border: 1.5px solid var(--line); border-radius: 10px;
         background: var(--panel); color: var(--text);
         font-size: 13.5px; font-weight: 700; padding: 12px;
         transition: border-color 0.15s, filter 0.15s;
       }
+      .gh-connect .gh-ico { width: 18px; height: 18px; }
       .gh-connect:hover { border-color: var(--accent); }
       .gh-connect:disabled { opacity: 0.6; cursor: default; }
       .gh-status {
@@ -214,7 +219,7 @@
         <div class="label">How to track</div>
         <div class="modes">
           <button class="mode selected" data-mode="github" type="button">
-            <span class="emo">🐙</span><span class="nm">GitHub</span><small>counts your GitHub commits</small>
+            <span class="emo"><svg class="gh-ico" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg></span><span class="nm">GitHub</span><small>counts your GitHub commits</small>
           </button>
           <button class="mode" data-mode="local" type="button">
             <span class="emo">📁</span><span class="nm">Local folders</span><small>scans repos on this machine</small>
@@ -224,7 +229,7 @@
 
       <!-- GitHub mode -->
       <div id="github-section" class="field">
-        <button id="github-connect" class="gh-connect" type="button">🐙 Connect GitHub</button>
+        <button id="github-connect" class="gh-connect" type="button"><svg class="gh-ico" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg><span>Connect GitHub</span></button>
         <div id="github-status" class="gh-status" hidden>
           <div class="gh-code" id="gh-code">········</div>
           <div class="gh-hint">
@@ -262,13 +267,13 @@
         <div class="label">Evolution pace</div>
         <div class="presets">
           <button class="preset" data-preset="chill" type="button">
-            <span class="emo">🐢</span><span class="nm">Chill</span><small>hatches at 2</small>
+            <span class="emo">🐢</span><span class="nm">Chill</span><small>hatches at 3</small>
           </button>
           <button class="preset selected" data-preset="normal" type="button">
-            <span class="emo">🦀</span><span class="nm">Normal</span><small>hatches at 3</small>
+            <span class="emo">🦀</span><span class="nm">Normal</span><small>hatches at 5</small>
           </button>
           <button class="preset" data-preset="grind" type="button">
-            <span class="emo">🔥</span><span class="nm">Grind</span><small>hatches at 5</small>
+            <span class="emo">🔥</span><span class="nm">Grind</span><small>hatches at 8</small>
           </button>
         </div>
         <button id="pace-adv-toggle" class="adv-toggle">Advanced ▸</button>

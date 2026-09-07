@@ -84,7 +84,7 @@ function render(s) {
 function makeMock() {
   // Preview with ?progress=N (drives stage + egg cracking). e.g. ?progress=2 shows a cracking egg.
   const params = new URLSearchParams(location.search);
-  const mins = [0, 3, 10, 30];
+  const mins = [0, 5, 15, 35];
   const names = ["Egg", "Hatchling", "Blaze", "Inferno"];
   const emojis = ["🥚", "🦀", "🔥", "🔥"];
   const progress = parseInt(params.get("progress") ?? "0", 10);

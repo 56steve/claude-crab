@@ -6,11 +6,11 @@
   "pollSeconds": 90,
   "//githubClientId": "Public OAuth App client id for GitHub Device Flow. Safe to ship (device flow uses no client secret).",
   "githubClientId": "Ov23li0XfuAMwMmn0JFg",
-  "//stages": "min = commits made since you adopted the pet (not lifetime). Egg cracks at 2, hatches at 3.",
+  "//stages": "min = commits made since you adopted the pet (not lifetime). Egg cracks at 2, hatches at 5.",
   "stages": [
     { "name": "Egg",       "min": 0,    "emoji": "🥚" },
-    { "name": "Hatchling", "min": 3,    "emoji": "🦀" },
-    { "name": "Blaze",     "min": 10,   "emoji": "🔥" },
-    { "name": "Inferno",   "min": 30,   "emoji": "🔥" }
+    { "name": "Hatchling", "min": 5,    "emoji": "🦀" },
+    { "name": "Blaze",     "min": 15,   "emoji": "🔥" },
+    { "name": "Inferno",   "min": 35,   "emoji": "🔥" }
   ]
 }
