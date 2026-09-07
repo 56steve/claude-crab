@@ -2,24 +2,42 @@
 
 const setup = window.crabSetup;
 
+// mode toggle
+const modeBtns = [...document.querySelectorAll(".mode")];
+const githubSection = document.getElementById("github-section");
+const localSection = document.getElementById("local-section");
+
+// github connect
+const githubConnectBtn = document.getElementById("github-connect");
+const githubStatus = document.getElementById("github-status");
+const githubDone = document.getElementById("github-done");
+const ghCode = document.getElementById("gh-code");
+const ghUri = document.getElementById("gh-uri");
+const ghLogin = document.getElementById("gh-login");
+
+// local fields
 const emailsEl = document.getElementById("emails");
 const addEmailBtn = document.getElementById("add-email");
 const homePathEl = document.getElementById("home-path");
 const folderInput = document.getElementById("folder");
-const advToggle = document.getElementById("adv-toggle");
-const advEl = document.getElementById("adv");
+const folderAdvToggle = document.getElementById("folder-adv-toggle");
+const folderAdvEl = document.getElementById("folder-adv");
 const pickBtn = document.getElementById("pick");
-const hatchBtn = document.getElementById("hatch");
-const errorEl = document.getElementById("error");
+
+// pace
 const paceAdvToggle = document.getElementById("pace-adv-toggle");
 const paceAdvEl = document.getElementById("pace-adv");
 const stagesGrid = document.getElementById("stages-grid");
 const presetBtns = [...document.querySelectorAll(".preset")];
 
+// shared
+const hatchBtn = document.getElementById("hatch");
+const errorEl = document.getElementById("error");
+
+let mode = "github";
+let githubConnected = false;
 let homeDir = "";
 
-// The fixed stage names/emojis after the egg. Only the commit thresholds
-// (mins) change; presets and the Advanced grid just fill those numbers in.
 const STAGE_DEFS = [
   { name: "Hatchling", emoji: "🦀" },
   { name: "Blaze", emoji: "🔥" },
@@ -30,10 +48,25 @@ const PRESETS = {
   normal: [3, 10, 30],
   grind: [5, 20, 60],
 };
-
 const stageInputs = [];
 
-/** Add one email input row. The remove button is hidden on the only row. */
+// ---- helpers ---------------------------------------------------------------
+function clearError() {
+  errorEl.textContent = "";
+}
+function setError(msg) {
+  errorEl.textContent = msg;
+}
+
+function setMode(m) {
+  mode = m;
+  modeBtns.forEach((b) => b.classList.toggle("selected", b.dataset.mode === m));
+  githubSection.hidden = m !== "github";
+  localSection.hidden = m !== "local";
+  clearError();
+}
+
+// local: email rows
 function addEmailRow(value = "") {
   const row = document.createElement("div");
   row.className = "email-row";
@@ -60,8 +93,6 @@ function addEmailRow(value = "") {
   refreshRemoveButtons();
   return input;
 }
-
-/** Only show remove buttons when there's more than one row. */
 function refreshRemoveButtons() {
   const rows = emailsEl.querySelectorAll(".email-row");
   rows.forEach((r) => {
@@ -69,22 +100,13 @@ function refreshRemoveButtons() {
       rows.length > 1 ? "visible" : "hidden";
   });
 }
-
 function collectEmails() {
   return [...emailsEl.querySelectorAll("input")]
     .map((i) => i.value.trim())
     .filter(Boolean);
 }
 
-function clearError() {
-  errorEl.textContent = "";
-}
-
-function setError(msg) {
-  errorEl.textContent = msg;
-}
-
-// Build the six editable threshold inputs (one per post-egg stage).
+// pace: build + read the threshold grid
 function buildStagesGrid() {
   STAGE_DEFS.forEach((def) => {
     const cell = document.createElement("div");
@@ -98,7 +120,6 @@ function buildStagesGrid() {
     input.min = "1";
     input.step = "1";
     input.addEventListener("input", () => {
-      // A manual edit means the ladder is now custom, so drop the preset highlight.
       presetBtns.forEach((b) => b.classList.remove("selected"));
       clearError();
     });
@@ -109,8 +130,6 @@ function buildStagesGrid() {
     stageInputs.push(input);
   });
 }
-
-// Fill the grid from a named preset and highlight that button.
 function applyPreset(name) {
   const vals = PRESETS[name];
   if (!vals) return;
@@ -120,8 +139,6 @@ function applyPreset(name) {
   presetBtns.forEach((b) => b.classList.toggle("selected", b.dataset.preset === name));
   clearError();
 }
-
-// Read the grid into a full stages array (egg first). Throws on a bad ladder.
 function collectStages() {
   const stages = [{ name: "Egg", min: 0, emoji: "🥚" }];
   let prev = 0;
@@ -138,13 +155,58 @@ function collectStages() {
   return stages;
 }
 
+function shortHome(p) {
+  const parts = p.split(/[\\/]/);
+  const last = parts[parts.length - 1] || p;
+  return `~ (${last})`;
+}
+
 // ---- events ----------------------------------------------------------------
+modeBtns.forEach((btn) => btn.addEventListener("click", () => setMode(btn.dataset.mode)));
+
+githubConnectBtn.addEventListener("click", async () => {
+  clearError();
+  githubConnectBtn.disabled = true;
+  githubConnectBtn.textContent = "Starting…";
+
+  const begin = await setup.githubBegin();
+  if (!begin || !begin.ok) {
+    setError((begin && begin.error) || "Could not start GitHub sign-in.");
+    githubConnectBtn.disabled = false;
+    githubConnectBtn.textContent = "🐙 Connect GitHub";
+    return;
+  }
+
+  ghCode.textContent = begin.userCode;
+  ghUri.textContent = (begin.verificationUri || "github.com/login/device").replace(
+    /^https?:\/\//,
+    ""
+  );
+  githubConnectBtn.hidden = true;
+  githubStatus.hidden = false;
+
+  const res = await setup.githubAwait();
+  if (!res || !res.ok) {
+    setError((res && res.error) || "GitHub sign-in failed.");
+    githubStatus.hidden = true;
+    githubConnectBtn.hidden = false;
+    githubConnectBtn.disabled = false;
+    githubConnectBtn.textContent = "🐙 Connect GitHub";
+    return;
+  }
+
+  githubConnected = true;
+  githubStatus.hidden = true;
+  ghLogin.textContent = "@" + res.login;
+  githubDone.hidden = false;
+});
+
 addEmailBtn.addEventListener("click", () => addEmailRow().focus());
 
-advToggle.addEventListener("click", () => {
-  const showing = !advEl.hidden;
-  advEl.hidden = showing;
-  advToggle.textContent = showing ? "Advanced ▸" : "Advanced ▾";
+folderAdvToggle.addEventListener("click", () => {
+  const showing = !folderAdvEl.hidden;
+  folderAdvEl.hidden = showing;
+  folderAdvToggle.textContent = showing ? "Advanced ▸" : "Advanced ▾";
   if (!showing && !folderInput.value) folderInput.value = homeDir;
 });
 
@@ -164,32 +226,44 @@ paceAdvToggle.addEventListener("click", () => {
 });
 
 hatchBtn.addEventListener("click", async () => {
-  const emails = collectEmails();
-  if (emails.length === 0) {
-    setError("Add at least one email so the crab knows which commits are yours.");
-    emailsEl.querySelector("input")?.focus();
-    return;
-  }
-  const folder = (advEl.hidden ? "" : folderInput.value.trim()) || homeDir;
+  clearError();
 
   let stages;
   try {
     stages = collectStages();
   } catch (e) {
     setError(e.message);
-    if (paceAdvEl.hidden) paceAdvToggle.click(); // reveal the grid to fix it
+    if (paceAdvEl.hidden) paceAdvToggle.click();
     return;
+  }
+
+  let payload;
+  if (mode === "github") {
+    if (!githubConnected) {
+      setError("Connect your GitHub account first.");
+      return;
+    }
+    payload = { mode: "github", stages };
+  } else {
+    const emails = collectEmails();
+    if (emails.length === 0) {
+      setError("Add at least one email so the crab knows which commits are yours.");
+      emailsEl.querySelector("input")?.focus();
+      return;
+    }
+    const folder = (folderAdvEl.hidden ? "" : folderInput.value.trim()) || homeDir;
+    payload = { mode: "local", emails, folder, stages };
   }
 
   hatchBtn.disabled = true;
   hatchBtn.textContent = "Hatching… 🥚";
-  try {
-    await setup.submit({ emails, folder, stages });
-  } catch (err) {
-    setError("Something went wrong saving your setup. Please try again.");
+  const res = await setup.submit(payload);
+  if (res && res.ok === false) {
+    setError(res.error || "Something went wrong. Please try again.");
     hatchBtn.disabled = false;
     hatchBtn.textContent = "Hatch my egg 🥚";
   }
+  // On success, main closes this window and launches the pet.
 });
 
 document.getElementById("close").addEventListener("click", () => window.close());
@@ -208,11 +282,5 @@ document.getElementById("close").addEventListener("click", () => window.close())
   addEmailRow(detected.email || "");
   buildStagesGrid();
   applyPreset("normal");
+  setMode("github");
 })();
-
-/** Pretty-print the home path (~) for display. */
-function shortHome(p) {
-  const parts = p.split(/[\\/]/);
-  const last = parts[parts.length - 1] || p;
-  return `~ (${last})`;
-}

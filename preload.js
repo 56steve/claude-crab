@@ -20,6 +20,10 @@ contextBridge.exposeInMainWorld("crabSetup", {
   defaults: () => ipcRenderer.invoke("onboard:defaults"),
   // Open a native folder picker; resolves to a path or null.
   pickFolder: () => ipcRenderer.invoke("onboard:pick-folder"),
+  // GitHub device flow: begin (get + show the code, open the browser).
+  githubBegin: () => ipcRenderer.invoke("onboard:github-begin"),
+  // GitHub device flow: wait for the user to authorize, then store the token.
+  githubAwait: () => ipcRenderer.invoke("onboard:github-await"),
   // Save the config and launch the pet.
   submit: (data) => ipcRenderer.invoke("onboard:submit", data),
 });

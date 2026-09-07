@@ -1,7 +1,35 @@
 {
-  "//": "Example of the per-user config that Claude Crab writes on first run. You don't create this by hand. The setup window generates it and saves it to the app's userData folder (Edit settings in the tray menu opens it). Shown here so you know the shape.",
-  "watchRoots": ["/Users/you/Projects"],
-  "authorEmails": ["you@example.com", "you@work.com"],
-  "scanDepth": 4,
-  "pollSeconds": 90
+  "//": "Example of the per-user config that Claude Crab writes on first run. You don't create this by hand. The setup window generates it and saves it to the app's userData folder (Edit settings in the tray menu opens it). Shown here so you know the shape. It stores one of the two modes below.",
+
+  "//github-mode": "When you choose GitHub during setup:",
+  "github": {
+    "mode": "github",
+    "githubLogin": "your-username",
+    "githubCreatedAt": "2016-01-01T00:00:00Z",
+    "githubBaselineLifetime": 4200,
+    "adoptedAt": "2026-09-07T00:00:00Z",
+    "scanDepth": 4,
+    "pollSeconds": 90,
+    "stages": [
+      { "name": "Egg", "min": 0, "emoji": "🥚" },
+      { "name": "Hatchling", "min": 3, "emoji": "🦀" },
+      { "name": "Blaze", "min": 10, "emoji": "🔥" },
+      { "name": "Inferno", "min": 30, "emoji": "🔥" }
+    ]
+  },
+
+  "//local-mode": "When you choose Local folders during setup:",
+  "local": {
+    "mode": "local",
+    "watchRoots": ["/Users/you/Projects"],
+    "authorEmails": ["you@example.com", "you@work.com"],
+    "scanDepth": 4,
+    "pollSeconds": 90,
+    "stages": [
+      { "name": "Egg", "min": 0, "emoji": "🥚" },
+      { "name": "Hatchling", "min": 3, "emoji": "🦀" },
+      { "name": "Blaze", "min": 10, "emoji": "🔥" },
+      { "name": "Inferno", "min": 30, "emoji": "🔥" }
+    ]
+  }
 }

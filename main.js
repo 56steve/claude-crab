@@ -9,6 +9,7 @@ const {
   screen,
   shell,
   dialog,
+  safeStorage,
   nativeImage,
 } = require("electron");
 const fs = require("fs");
@@ -16,11 +17,12 @@ const os = require("os");
 const path = require("path");
 const { execFile } = require("child_process");
 const { scan } = require("./tracker");
+const github = require("./github");
 const { crabTrayPNG } = require("./tray-icon");
 
-// Defaults shipped with the app (stages, cadence). Personal settings, which
-// emails count as "you" and which folders to watch, are collected on first
-// run and saved to userData, never to this file.
+// Defaults shipped with the app (stages, cadence, GitHub client id). Personal
+// settings, which mode to track in and which emails/folders count as "you",
+// are collected on first run and saved to userData, never to this file.
 const DEFAULT_CONFIG_PATH = path.join(__dirname, "config.json");
 
 let win = null;
@@ -28,6 +30,8 @@ let onboardWin = null;
 let tray = null;
 let lastStats = null;
 let pollTimer = null;
+let pendingDevice = null; // in-flight device-flow data during onboarding
+let pendingGithub = null; // { login, createdAt } captured after authorization
 
 // ---------------------------------------------------------------------------
 // Config: shipped defaults + per-user overrides (saved in userData)
@@ -46,6 +50,7 @@ function loadDefaults() {
       authorEmails: [],
       scanDepth: 4,
       pollSeconds: 90,
+      githubClientId: "",
       stages: [{ name: "Hatchling", min: 0, emoji: "🦀" }],
     };
   }
@@ -127,6 +132,41 @@ function detectGitEmail() {
 }
 
 // ---------------------------------------------------------------------------
+// GitHub token storage (encrypted at rest via Electron safeStorage)
+// ---------------------------------------------------------------------------
+function tokenPath() {
+  return path.join(app.getPath("userData"), "github-token.bin");
+}
+function saveToken(token) {
+  try {
+    const buf = safeStorage.isEncryptionAvailable()
+      ? safeStorage.encryptString(token)
+      : Buffer.from(token, "utf8");
+    fs.mkdirSync(path.dirname(tokenPath()), { recursive: true });
+    fs.writeFileSync(tokenPath(), buf);
+  } catch (err) {
+    console.error("[claude-crab] failed to save token:", err.message);
+  }
+}
+function loadToken() {
+  try {
+    const buf = fs.readFileSync(tokenPath());
+    return safeStorage.isEncryptionAvailable()
+      ? safeStorage.decryptString(buf)
+      : buf.toString("utf8");
+  } catch {
+    return null;
+  }
+}
+function clearToken() {
+  try {
+    fs.unlinkSync(tokenPath());
+  } catch {
+    /* nothing to remove */
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Persistent state (last-seen commit count, to detect fresh commits)
 // ---------------------------------------------------------------------------
 function statePath() {
@@ -163,7 +203,7 @@ function crabTrayImage() {
 function createOnboardingWindow() {
   onboardWin = new BrowserWindow({
     width: 460,
-    height: 640,
+    height: 660,
     resizable: false,
     frame: false,
     transparent: false,
@@ -242,37 +282,70 @@ function startCrab() {
 }
 
 // ---------------------------------------------------------------------------
+// Gather commit numbers for the active tracking mode.
+// Returns { lifetime, today, week, repoCount, progress }.
+// ---------------------------------------------------------------------------
+async function gatherStats(config) {
+  if (config.mode === "github") {
+    const token = loadToken();
+    if (!token) throw new Error("GitHub is not connected.");
+    const s = await github.fetchStats(token, config.adoptedAt);
+    const progress = s.sinceAdoption;
+    return {
+      lifetime: (config.githubBaselineLifetime || 0) + progress,
+      today: s.today,
+      week: s.week,
+      repoCount: s.repoCount,
+      progress,
+    };
+  }
+
+  // Local mode: scan repos and derive progress from a saved baseline.
+  const stats = await scan(config);
+  const state = loadState();
+  if (state.baseline == null) {
+    state.baseline = stats.lifetime;
+    saveState(state);
+  }
+  return {
+    lifetime: stats.lifetime,
+    today: stats.today,
+    week: stats.week,
+    repoCount: stats.repoCount,
+    progress: Math.max(0, stats.lifetime - state.baseline),
+  };
+}
+
+// ---------------------------------------------------------------------------
 // Scan + push to UI
 // ---------------------------------------------------------------------------
 async function runScan(config) {
-  let stats;
+  let g;
   try {
-    stats = await scan(config);
+    g = await gatherStats(config);
   } catch (err) {
     console.error("[claude-crab] scan failed:", err.message);
     return;
   }
 
   const state = loadState();
-  // Adopt the pet at the current commit total: the egg starts fresh and grows
-  // with every commit you make from now on.
-  if (state.baseline == null) state.baseline = stats.lifetime;
-  const progress = Math.max(0, stats.lifetime - state.baseline);
-
   const prev = state.lastProgress;
-  const justCommitted = prev !== null && progress > prev;
-  const gained = prev !== null ? Math.max(0, progress - prev) : 0;
+  const justCommitted = prev !== null && g.progress > prev;
+  const gained = prev !== null ? Math.max(0, g.progress - prev) : 0;
 
-  state.lastProgress = progress;
-  state.lastLifetime = stats.lifetime;
+  state.lastProgress = g.progress;
+  state.lastLifetime = g.lifetime;
   saveState(state);
 
-  const stage = pickStage(config.stages, progress);
-  const nextStage = pickNextStage(config.stages, progress);
+  const stage = pickStage(config.stages, g.progress);
+  const nextStage = pickNextStage(config.stages, g.progress);
 
   lastStats = {
-    ...stats,
-    progress,
+    lifetime: g.lifetime,
+    today: g.today,
+    week: g.week,
+    repoCount: g.repoCount,
+    progress: g.progress,
     stageIndex: stage.index,
     stageName: stage.def.name,
     stageEmoji: stage.def.emoji,
@@ -299,6 +372,37 @@ function pickNextStage(stages, lifetime) {
     if (stages[i].min > lifetime) return { def: stages[i], index: i };
   }
   return null;
+}
+
+// ---------------------------------------------------------------------------
+// Reset the pet to an egg for the current mode.
+// ---------------------------------------------------------------------------
+async function resetToEgg(config) {
+  if (config.mode === "github") {
+    // Re-adopt now: freeze the current lifetime as the new baseline so
+    // progress restarts at zero.
+    const token = loadToken();
+    try {
+      const s = token ? await github.fetchStats(token, config.adoptedAt) : null;
+      const lifetime = s
+        ? (config.githubBaselineLifetime || 0) + s.sinceAdoption
+        : config.githubBaselineLifetime || 0;
+      const user = loadUserConfig() || {};
+      user.adoptedAt = new Date().toISOString();
+      user.githubBaselineLifetime = lifetime;
+      saveUserConfig(user);
+      Object.assign(config, resolveConfig());
+    } catch (err) {
+      console.error("[claude-crab] github reset failed:", err.message);
+    }
+  } else {
+    const st = loadState();
+    st.baseline = st.lastLifetime != null ? st.lastLifetime : null;
+  }
+  const st = loadState();
+  st.lastProgress = null;
+  saveState(st);
+  runScan(config);
 }
 
 // ---------------------------------------------------------------------------
@@ -333,13 +437,7 @@ function buildTray(config) {
     },
     {
       label: "Reset to egg 🥚",
-      click: () => {
-        const st = loadState();
-        st.baseline = st.lastLifetime != null ? st.lastLifetime : null;
-        st.lastProgress = null;
-        saveState(st);
-        runScan(config);
-      },
+      click: () => resetToEgg(config),
     },
     { type: "separator" },
     {
@@ -349,8 +447,7 @@ function buildTray(config) {
     {
       label: "Reload settings",
       click: () => {
-        const fresh = resolveConfig();
-        Object.assign(config, fresh);
+        Object.assign(config, resolveConfig());
         restartPolling(config);
         runScan(config);
       },
@@ -407,20 +504,85 @@ app.whenReady().then(() => {
     return res.filePaths[0];
   });
 
-  ipcMain.handle("onboard:submit", (_e, payload) => {
+  // GitHub device flow: begin (get + show the code, open the browser).
+  ipcMain.handle("onboard:github-begin", async () => {
+    const clientId = loadDefaults().githubClientId;
+    if (!clientId) return { ok: false, error: "No GitHub client id is configured." };
+    try {
+      pendingDevice = { ...(await github.requestDeviceCode(clientId)), clientId };
+      shell.openExternal(pendingDevice.verificationUri);
+      return {
+        ok: true,
+        userCode: pendingDevice.userCode,
+        verificationUri: pendingDevice.verificationUri,
+      };
+    } catch (err) {
+      return { ok: false, error: err.message };
+    }
+  });
+
+  // GitHub device flow: wait for authorization, then store the token.
+  ipcMain.handle("onboard:github-await", async () => {
+    if (!pendingDevice) return { ok: false, error: "Start the GitHub sign-in first." };
+    try {
+      const token = await github.pollForToken(
+        pendingDevice.clientId,
+        pendingDevice.deviceCode,
+        pendingDevice.interval,
+        pendingDevice.expiresIn
+      );
+      const stats = await github.fetchStats(token, new Date().toISOString());
+      saveToken(token);
+      pendingGithub = { login: stats.login, createdAt: stats.createdAt };
+      pendingDevice = null;
+      return { ok: true, login: stats.login };
+    } catch (err) {
+      pendingDevice = null;
+      return { ok: false, error: err.message };
+    }
+  });
+
+  ipcMain.handle("onboard:submit", async (_e, payload) => {
     const defaults = loadDefaults();
-    const emails = (payload.emails || [])
-      .map((s) => String(s).trim())
-      .filter(Boolean);
-    const folder = String(payload.folder || os.homedir()).trim() || os.homedir();
     const stages = sanitizeStages(payload.stages, defaults.stages);
-    saveUserConfig({
-      watchRoots: [folder],
-      authorEmails: emails,
+    const base = {
       scanDepth: defaults.scanDepth || 4,
       pollSeconds: defaults.pollSeconds || 90,
       stages,
-    });
+    };
+
+    if (payload.mode === "github") {
+      if (!pendingGithub || !loadToken()) {
+        return { ok: false, error: "Connect your GitHub account first." };
+      }
+      let baseline = 0;
+      try {
+        baseline = await github.fetchLifetimeCommits(loadToken(), pendingGithub.createdAt);
+      } catch (err) {
+        console.error("[claude-crab] lifetime fetch failed:", err.message);
+      }
+      saveUserConfig({
+        ...base,
+        mode: "github",
+        githubLogin: pendingGithub.login,
+        githubCreatedAt: pendingGithub.createdAt,
+        githubBaselineLifetime: baseline,
+        adoptedAt: new Date().toISOString(),
+      });
+    } else {
+      const emails = (payload.emails || [])
+        .map((s) => String(s).trim())
+        .filter(Boolean);
+      const folder =
+        String(payload.folder || os.homedir()).trim() || os.homedir();
+      saveUserConfig({
+        ...base,
+        mode: "local",
+        watchRoots: [folder],
+        authorEmails: emails,
+      });
+    }
+
     if (onboardWin) {
       const w = onboardWin;
       onboardWin = null; // avoid the "closed without config" quit guard
@@ -442,3 +604,6 @@ app.on("window-all-closed", (e) => {
   // Keep running in the tray even if the window is hidden/closed.
   e.preventDefault();
 });
+
+// Exported only so the token can be cleared if a future "Sign out" is added.
+module.exports = { clearToken };

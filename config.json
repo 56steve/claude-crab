@@ -4,6 +4,8 @@
   "authorEmails": [],
   "scanDepth": 4,
   "pollSeconds": 90,
+  "//githubClientId": "Public OAuth App client id for GitHub Device Flow. Safe to ship (device flow uses no client secret).",
+  "githubClientId": "Ov23li0XfuAMwMmn0JFg",
   "//stages": "min = commits made since you adopted the pet (not lifetime). Egg cracks at 2, hatches at 3.",
   "stages": [
     { "name": "Egg",       "min": 0,    "emoji": "🥚" },
