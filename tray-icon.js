@@ -1,6 +1,6 @@
 "use strict";
 
-// Generates the Claude-crab menu-bar icon as a PNG buffer — no image files,
+// Generates the Claude-crab menu-bar icon as a PNG buffer, no image files,
 // no canvas dependency, just zlib. The crab is blocky, so it maps cleanly onto
 // a pixel grid drawn from rectangles (body, arms, legs, eyes) with a dark rim.
 

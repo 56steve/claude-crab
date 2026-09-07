@@ -18,8 +18,8 @@ const { execFile } = require("child_process");
 const { scan } = require("./tracker");
 const { crabTrayPNG } = require("./tray-icon");
 
-// Defaults shipped with the app (stages, cadence). Personal settings — which
-// emails count as "you" and which folders to watch — are collected on first
+// Defaults shipped with the app (stages, cadence). Personal settings, which
+// emails count as "you" and which folders to watch, are collected on first
 // run and saved to userData, never to this file.
 const DEFAULT_CONFIG_PATH = path.join(__dirname, "config.json");
 

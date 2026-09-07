@@ -1,5 +1,5 @@
 {
-  "//": "Example of the per-user config that Claude Crab writes on first run. You don't create this by hand — the setup window generates it and saves it to the app's userData folder (Edit settings… in the tray menu opens it). Shown here so you know the shape.",
+  "//": "Example of the per-user config that Claude Crab writes on first run. You don't create this by hand. The setup window generates it and saves it to the app's userData folder (Edit settings in the tray menu opens it). Shown here so you know the shape.",
   "watchRoots": ["/Users/you/Projects"],
   "authorEmails": ["you@example.com", "you@work.com"],
   "scanDepth": 4,

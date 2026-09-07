@@ -15,4 +15,4 @@ Thumbs.db
 .idea/
 
 # per-user runtime config/state is stored in the OS userData folder,
-# never in the repo — nothing to ignore here, just noting it.
+# never in the repo, nothing to ignore here, just noting it.
